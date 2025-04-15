@@ -4,6 +4,7 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function UserForm() {
+  const [showForm, setShowForm] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,71 +45,99 @@ export default function UserForm() {
     password !== "" &&
     confirmPassword !== "" &&
     passwordsMatch;
-
   return (
-    <div className="flex flex-col gap-4 max-w-md mx-auto mt-8">
-      <input
-        className="border p-2 rounded"
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        className="border p-2 rounded"
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        className={`border p-2 rounded transition-all duration-300 ${
-          confirmPassword && !passwordsMatch
-            ? "animate-shake border-red-500"
-            : ""
-        }`}
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+    <div className="max-w-md mx-auto mt-8 flex flex-col items-center gap-4">
+      <button
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        onClick={() => console.log("Login clicked")}
+      >
+        Login
+      </button>
 
-      <input
-        className={`border p-2 rounded transition-all duration-300 ${
-          confirmPassword && !passwordsMatch
-            ? "animate-shake border-red-500"
-            : ""
-        }`}
-        type="password"
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-      />
-
-      {/* Realtime match indicator */}
-      {confirmPassword !== "" && (
-        <p
-          className={`text-sm ${
-            passwordsMatch ? "text-green-600" : "text-red-600"
-          }`}
+      {/* Toggle Form Button */}
+      {!showForm && (
+        <button
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          onClick={() => setShowForm(true)}
         >
-          {passwordsMatch ? "✅ Passwords match" : "❌ Passwords do not match"}
-        </p>
+          Create an Account
+        </button>
       )}
 
-      {error && <p className="text-red-500">{error}</p>}
+      {/* User Form */}
+      {showForm && (
+        <>
+          <input
+            className="border border-black p-2 rounded w-full text-black"
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+            className="border border-black p-2 rounded w-full text-black"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            className={`border border-black p-2 rounded w-full transition-all duration-300 text-black ${
+              confirmPassword && !passwordsMatch
+                ? "animate-shake border-red-500"
+                : ""
+            }`}
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <input
+            className={`border border-black p-2 rounded w-full transition-all duration-300 text-black ${
+              confirmPassword && !passwordsMatch
+                ? "animate-shake border-red-500"
+                : ""
+            }`}
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          {confirmPassword !== "" && (
+            <p
+              className={`text-sm ${
+                passwordsMatch ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {passwordsMatch
+                ? "✅ Passwords match"
+                : "❌ Passwords do not match"}
+            </p>
+          )}
 
-      <button
-        className={`p-2 rounded text-white ${
-          isFormValid
-            ? "bg-blue-500 hover:bg-blue-600"
-            : "bg-gray-400 cursor-not-allowed"
-        }`}
-        onClick={createUser}
-        disabled={!isFormValid}
-      >
-        Create Account
-      </button>
+          {error && <p className="text-red-500">{error}</p>}
+
+          <button
+            className={`p-2 w-full rounded text-white ${
+              isFormValid
+                ? "bg-blue-500 hover:bg-blue-600"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
+            onClick={createUser}
+            disabled={!isFormValid}
+          >
+            Create Account
+          </button>
+
+          {/* Optional: Cancel button */}
+          <button
+            className="mt-2 text-sm text-gray-600 hover:underline"
+            onClick={() => setShowForm(false)}
+          >
+            Cancel
+          </button>
+        </>
+      )}
     </div>
   );
 }
