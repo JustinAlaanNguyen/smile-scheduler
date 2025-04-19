@@ -3,6 +3,9 @@
 import { useState } from "react";
 import UserForm from "../components/UserForm";
 import Image from "next/image";
+import { Comfortaa } from "next/font/google";
+
+const comfortaa = Comfortaa({ subsets: ["latin"], weight: ["400", "700"] });
 
 export default function Home() {
   const [clientIndex, setClientIndex] = useState(0);
@@ -11,8 +14,8 @@ export default function Home() {
   const clientImages = [
     {
       src: "/smilSchedHomePage.jpg",
-      title: "Create your own clientele!",
-      desc: "Quickly add new clients with essential details like name, and preferences to build your personal client base.",
+      title: "Create your own clientele database!",
+      desc: "Add new clients with details like name, and preferences to build your personal client base.",
     },
     {
       src: "/logo.jpg",
@@ -60,10 +63,14 @@ export default function Home() {
         <div className="flex flex-col md:flex-row justify-center gap-8 mt-12 w-full">
           {/* Client Section */}
           <div className="w-full md:w-1/2 bg-white p-4 md:p-6 rounded-lg shadow-md min-h-[250px] relative">
-            <h2 className="text-2xl font-bold mb-1 text-center text-blue-700">
+            <h2
+              className={`text-3xl font-bold tracking-tight mb-1 text-center text-blue-700 ${comfortaa.className}`}
+            >
               {clientImages[clientIndex].title}
             </h2>
-            <p className="text-xl mb-3 text-center text-blue-300">
+            <p
+              className={`text-xl mb-3 text-center text-blue-300 ${comfortaa.className}`}
+            >
               {clientImages[clientIndex].desc}
             </p>
             <div className="overflow-hidden relative">
@@ -104,10 +111,14 @@ export default function Home() {
 
           {/* Appointment Section */}
           <div className="w-full md:w-1/2 bg-white p-4 md:p-6 rounded-lg shadow-md min-h-[250px] relative">
-            <h2 className="text-2xl font-bold mb-1 text-center text-blue-700">
+            <h2
+              className={`text-3xl font-bold tracking-tight mb-1 text-center text-blue-700 ${comfortaa.className}`}
+            >
               {apptImages[apptIndex].title}
             </h2>
-            <p className="text-xl mb-3 text-center text-blue-300">
+            <p
+              className={`text-xl mb-3 text-center text-blue-300 ${comfortaa.className}`}
+            >
               {apptImages[apptIndex].desc}
             </p>
             <div className="overflow-hidden relative">

@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Letplay1!', // Your password here
+  password: 'Letplay1!',
   database: 'smile_scheduler_db',
 });
 
