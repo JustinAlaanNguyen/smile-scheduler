@@ -1,18 +1,14 @@
-const mysql = require('mysql2');
+//db.js
+const mysql = require('mysql2/promise'); // promise wrapper
 
-const db = mysql.createConnection({
+const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: 'Letplay1!',
   database: 'smile_scheduler_db',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
 
-db.connect((err) => {
-  if (err) {
-    console.error('Database connection error:', err);
-    return;
-  }
-  console.log('Connected to MySQL!');
-});
-
-module.exports = db;
+module.exports = pool;

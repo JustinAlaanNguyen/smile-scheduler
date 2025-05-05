@@ -1,3 +1,4 @@
+//userController.js
 const bcrypt = require('bcrypt');
 const db = require('../db');
 
@@ -14,6 +15,9 @@ exports.createUser = async (req, res) => {
       db.query(query, [username, email, hashedPassword], (err, results) => {
         if (err) {
           console.error('DB error:', err);
+          if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'Email already exists' });
+          }
           return res.status(500).json({ error: 'Database error' });
         }
   
@@ -26,14 +30,24 @@ exports.createUser = async (req, res) => {
   };
 
 // Update account
-exports.updateUser = (req, res) => {
+exports.updateUser = async (req, res) => {
   const { username, email, password } = req.body;
-  const sql = 'UPDATE users SET username=?, email=?, password=? WHERE id=?';
-  db.query(sql, [username, email, password, req.params.id], (err) => {
-    if (err) return res.status(500).send(err);
-    res.send('User updated successfully');
-  });
+
+  try {
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const sql = 'UPDATE users SET username=?, email=?, password=? WHERE id=?';
+
+    db.query(sql, [username, email, hashedPassword, req.params.id], (err) => {
+      if (err) return res.status(500).send(err);
+      res.send('User updated successfully');
+    });
+  } catch (error) {
+    console.error('Update error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
+
 
 // Delete account
 exports.deleteUser = (req, res) => {

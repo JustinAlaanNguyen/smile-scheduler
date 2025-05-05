@@ -1,3 +1,4 @@
+//UserForm.jsx
 "use client";
 
 import { useState } from "react";
@@ -16,26 +17,34 @@ export default function UserForm() {
 
   const createUser = async () => {
     if (!passwordsMatch) {
-      setError("Passwords do not match");
+      setError("❌ Passwords do not match.");
       return;
     }
 
     try {
-      await axios.post("http://localhost:3001/api/users/register", {
+      await axios.post("http://localhost:3001/api/users", {
         username,
         email,
         password,
       });
-      alert("User created!");
-      // Reset form
+      alert("✅ User created!");
       setUsername("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setError("");
+      setShowForm(false); // optionally hide form after success
     } catch (error) {
-      console.error("Error creating user:", error);
-      alert("Failed to create user");
+      if (error.response) {
+        // Error from backend
+        console.log(error.response);
+        const message =
+          error.response.data?.error ||
+          "Something went wrong. Please try again.";
+        setError(`❌ ${message}`);
+      } else {
+        setError("❌ Server not responding. Please try again later.");
+      }
     }
   };
 
@@ -103,6 +112,7 @@ export default function UserForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
+
           {confirmPassword !== "" && (
             <p
               className={`text-sm ${
@@ -115,7 +125,12 @@ export default function UserForm() {
             </p>
           )}
 
-          {error && <p className="text-red-500">{error}</p>}
+          {/* Styled Error */}
+          {error && (
+            <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">
+              {error}
+            </div>
+          )}
 
           <button
             className={`p-2 w-full rounded text-white ${
@@ -129,7 +144,6 @@ export default function UserForm() {
             Create Account
           </button>
 
-          {/* Optional: Cancel button */}
           <button
             className="mt-2 text-sm text-gray-600 hover:underline"
             onClick={() => setShowForm(false)}

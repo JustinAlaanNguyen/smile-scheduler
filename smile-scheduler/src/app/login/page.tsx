@@ -17,34 +17,43 @@ export default function LoginPage() {
     });
 
     if (res?.ok) {
-      router.push("/dashboard"); // protected page
+      router.push("/dashboard");
     } else {
-      alert("Login failed. Check your credentials.");
+      alert("❌ Login failed. Check your credentials.");
     }
   };
 
   return (
-    <div className="flex flex-col items-center mt-20 gap-4">
-      <input
-        type="email"
-        placeholder="Email"
-        className="p-2 border rounded"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        className="p-2 border rounded"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button
-        onClick={handleLogin}
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        Login
-      </button>
+    <div className="min-h-screen flex items-center justify-center bg-[#9BC5D4] px-4">
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-md flex flex-col items-center gap-4">
+        <h1 className="text-2xl font-semibold text-blue-700">Login</h1>
+        <input
+          type="email"
+          placeholder="Email"
+          className="border border-black p-2 rounded w-full text-black"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="border border-black p-2 rounded w-full text-black"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+          onClick={handleLogin}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
+        >
+          Login
+        </button>
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="mt-2 text-sm text-gray-600 hover:underline"
+        >
+          ← Back to Home
+        </button>
+      </div>
     </div>
   );
 }

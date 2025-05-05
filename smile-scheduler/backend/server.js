@@ -1,3 +1,12 @@
+// server.js
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
+});
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -7,7 +16,6 @@ const port = 3001;
 
 app.use(cors());
 app.use(express.json());
-
 
 // Example route
 app.get('/', (req, res) => {

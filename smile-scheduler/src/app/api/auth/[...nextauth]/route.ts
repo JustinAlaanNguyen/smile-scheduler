@@ -26,7 +26,8 @@ export const authOptions: NextAuthOptions = {
         const isValid = await compare(password, user.password);
         if (!isValid) throw new Error("Invalid password");
       
-        return { id: user.id, email: user.email, name: user.username };
+        return { id: String(user.id), email: user.email, name: user.username };
+
       }
     }),
   ],
