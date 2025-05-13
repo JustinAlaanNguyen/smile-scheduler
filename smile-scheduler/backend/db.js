@@ -1,4 +1,4 @@
-//db.js
+//backend/db.js
 const mysql = require('mysql2/promise'); // promise wrapper
 
 const pool = mysql.createPool({

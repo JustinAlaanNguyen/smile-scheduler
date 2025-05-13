@@ -1,4 +1,4 @@
-// server.js
+//backend/server.js
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
 });
@@ -28,3 +28,5 @@ app.use('/api/users', userRoutes);
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+

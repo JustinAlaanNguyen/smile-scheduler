@@ -1,4 +1,4 @@
-//userRoutes.js
+//backend/routes/userRoutes.js
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
@@ -12,5 +12,6 @@ router.put('/update/:id', userController.updateUser);
 // Delete account
 router.delete('/delete/:id', userController.deleteUser);
   
+router.get('/id/:email', userController.getUserIdByEmail);
 
 module.exports = router;

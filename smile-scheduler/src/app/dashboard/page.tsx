@@ -67,7 +67,7 @@ export default async function Dashboard() {
         <div className="bg-white p-8 rounded-2xl shadow-xl flex flex-col gap-8">
           <div>
             <Link
-              href="#"
+              href="/clients"
               className="text-2xl font-semibold text-[#327b8c] hover:underline flex items-center gap-2 hover:ring-2 hover:ring-[#9dc7d4] rounded px-2 py-1 transition-all"
             >
               <Smile className="w-6 h-6 text-[#4e6c71]" /> Clients

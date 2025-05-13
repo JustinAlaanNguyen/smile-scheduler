@@ -1,4 +1,4 @@
-//dbHelpers.ts
+//backend/dbHelpers.ts
 import db from "./db";
 import { RowDataPacket } from "mysql2/promise";
 
