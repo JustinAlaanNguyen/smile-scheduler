@@ -4,7 +4,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { getUserByEmail } from "@/../backend/dbHelpers";
 
-// ✅ Explicit type
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({

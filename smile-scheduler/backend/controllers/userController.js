@@ -59,20 +59,6 @@ exports.deleteUser = (req, res) => {
 };
 
 
-// Get clients for a specific user
-exports.getClientsByUserId = async (req, res) => {
-  const userId = req.params.userId;
-
-  try {
-    const [rows] = await db.query('SELECT * FROM clients WHERE user_id = ?', [userId]);
-
-    res.json(rows);
-  } catch (error) {
-    console.error('Error fetching clients:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
 // Get id of user by email
 exports.getUserIdByEmail = async (req, res) => {
   const email = req.params.email;
@@ -86,7 +72,7 @@ exports.getUserIdByEmail = async (req, res) => {
 
     res.json({ id: rows[0].id });
   } catch (error) {
-    console.error('Error fetching user ID by email:', error);
+    //console.error('Error fetching user ID by email:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
