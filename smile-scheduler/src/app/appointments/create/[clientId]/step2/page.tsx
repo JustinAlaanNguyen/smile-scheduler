@@ -1,27 +1,17 @@
 "use client";
 
 import { useSearchParams, useParams } from "next/navigation";
+import { getSession } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import { format, differenceInMinutes, parse } from "date-fns";
 import { useEffect, useState } from "react";
-
-const generateTimeSlots = () => {
-  const slots = [];
-  for (let h = 8; h <= 20; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      const hour = h.toString().padStart(2, "0");
-      const minute = m.toString().padStart(2, "0");
-      slots.push(`${hour}:${minute}`);
-    }
-  }
-  return slots;
-};
 
 export default function AppointmentStep2() {
   const { clientId } = useParams() as { clientId: string };
   const searchParams = useSearchParams();
   const date = searchParams?.get("date");
 
+  const [userId, setUserId] = useState<number | null>(null);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [client, setClient] = useState<{
@@ -33,7 +23,108 @@ export default function AppointmentStep2() {
   >("");
   const [notes, setNotes] = useState("");
 
-  const timeSlots = generateTimeSlots();
+  const fetchUserId = async (email: string): Promise<number | null> => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/users/id/${email}`);
+      if (!res.ok) throw new Error("Failed to fetch user id");
+      const data = await res.json();
+      return data.id; // <-- Change here from user_id to id
+    } catch (error) {
+      console.error("Error fetching user ID:", error);
+      return null;
+    }
+  };
+
+  const fetchClientAndUser = async () => {
+    const session = await getSession();
+    const email = session?.user?.email;
+
+    if (!email) {
+      console.error("No session email found.");
+      return;
+    }
+
+    const id = await fetchUserId(email);
+    if (id === null) {
+      console.error("User ID not fetched.");
+      return;
+    }
+    setUserId(id);
+
+    try {
+      const res = await fetch(
+        `http://localhost:3001/api/clients/client/${clientId}?email=${email}`
+      );
+      if (!res.ok) {
+        console.error("Failed to fetch client details", res.status);
+        return;
+      }
+      const data = await res.json();
+      setClient({ first_name: data.first_name, last_name: data.last_name });
+    } catch (err) {
+      console.error("Error fetching client:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (clientId) fetchClientAndUser();
+  }, [clientId]);
+
+  const handleBookAppointment = async () => {
+    console.log(clientId, userId, date, startTime, endTime, appointmentType);
+    if (
+      !clientId ||
+      !userId ||
+      !date ||
+      !startTime ||
+      !endTime ||
+      !appointmentType
+    ) {
+      alert("Please fill out all required fields.");
+      return;
+    }
+
+    const appointmentData = {
+      client_id: clientId,
+      user_id: userId,
+      date,
+      start_time: startTime,
+      end_time: endTime,
+      length: length ?? 0,
+      type: appointmentType,
+      notes,
+    };
+
+    try {
+      const res = await fetch("http://localhost:3001/api/appointments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(appointmentData),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok)
+        throw new Error(result.error || "Failed to create appointment");
+
+      alert("Appointment booked successfully!");
+    } catch (err) {
+      console.error("Booking error:", err);
+      alert("There was an error booking the appointment.");
+    }
+  };
+
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let h = 8; h <= 20; h++) {
+      for (let m = 0; m < 60; m += 15) {
+        const hour = h.toString().padStart(2, "0");
+        const minute = m.toString().padStart(2, "0");
+        slots.push(`${hour}:${minute}`);
+      }
+    }
+    return slots;
+  };
 
   const calculateLength = () => {
     if (startTime && endTime) {
@@ -44,10 +135,8 @@ export default function AppointmentStep2() {
     return null;
   };
 
-  useEffect(() => {
-    // TODO: Replace with real API call to fetch client by clientId
-    setClient({ first_name: "Jane", last_name: "Doe" });
-  }, [clientId]);
+  const timeSlots = generateTimeSlots();
+  const length = calculateLength();
 
   if (!date) {
     return (
@@ -58,7 +147,6 @@ export default function AppointmentStep2() {
   }
 
   const selectedDate = format(new Date(date), "MMMM dd, yyyy");
-  const length = calculateLength();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
@@ -204,6 +292,12 @@ export default function AppointmentStep2() {
             </div>
           </div>
         </div>
+        <button
+          onClick={handleBookAppointment}
+          className="bg-[#327b8c] text-white px-6 py-3 rounded-lg hover:bg-[#285f6e]"
+        >
+          Book Appointment
+        </button>
       </div>
     </div>
   );

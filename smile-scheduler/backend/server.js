@@ -25,9 +25,11 @@ app.get('/', (req, res) => {
 // Routes
 const userRoutes = require('./routes/userRoutes');
 const clientRoutes = require('./routes/clientRoutes'); 
+const appointmentRoutes = require("./routes/appointmentRoutes");
 
 app.use('/api/users', userRoutes);
 app.use('/api/clients', clientRoutes); 
+app.use("/api/appointments", appointmentRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

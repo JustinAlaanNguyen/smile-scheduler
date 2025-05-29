@@ -28,18 +28,24 @@ exports.createClient = async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 };
-// Get all clients for a specific user
+
+// Get all clients for a specific user// Get all clients for a specific user
 exports.getClientsByUserId = async (req, res) => {
-  const { userId } = req.params;
+  const userId = Number(req.params.userId);
+  console.log('➡️ [Controller] Getting clients for userId:', userId);
 
   try {
-    const [rows] = await db.query('SELECT * FROM clients WHERE user_id = ?', [userId]);
-    res.status(200).json(rows); // Return empty array if no clients found
+    console.log('➡️ [Controller] Getting clients for userId:', userId);
+    const [clients] = await db.query('SELECT * FROM clients WHERE user_id = ?', [userId]);
+    console.log("Clients:", clients);
+    res.status(200).json(clients);
   } catch (error) {
-   console.error('Error fetching clients by user ID:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('[Controller] Error retrieving clients:', error);
+    res.status(500).json({ error: 'Failed to retrieve clients for user' });
   }
 };
+
+
 // Get a single client by ID with security check
 exports.getClientById = async (req, res) => {
   const { clientId } = req.params;

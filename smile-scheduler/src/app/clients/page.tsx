@@ -1,122 +1,96 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-//import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import { Plus, Search } from "lucide-react";
-import debounce from "lodash.debounce";
 
-type Client = {
+interface Client {
   id: number;
   first_name: string;
   last_name: string;
   email: string;
   phone: string;
-};
+  notes: string;
+  created_at: string;
+  user_id: number;
+}
 
 export default function ClientsPage() {
   const { data: session, status } = useSession();
   const [clients, setClients] = useState<Client[]>([]);
-  const [query, setQuery] = useState("");
-  const [userId, setUserId] = useState("");
-  //const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Fetch user ID on load
   useEffect(() => {
-    if (session?.user?.email) {
-      fetch(`http://localhost:3001/api/users/id/${session.user.email}`)
-        .then((res) => res.json())
-        .then((data) => setUserId(data.id))
-        .catch(console.error);
-    }
-  }, [session]);
+    const fetchClients = async () => {
+      if (status !== "authenticated" || !session?.user?.email) return;
 
-  // Debounced fetch
-  const fetchClients = useCallback(
-    debounce((searchTerm: string) => {
-      if (!userId) return;
+      try {
+        const encodedEmail = encodeURIComponent(session.user.email);
+        // Step 1: Get user ID by email
+        const userRes = await fetch(
+          `http://localhost:3001/api/users/id/${encodedEmail}`
+        );
+        if (!userRes.ok) throw new Error("Failed to fetch user ID");
+        const { id: userId } = await userRes.json();
 
-      const endpoint = searchTerm
-        ? `http://localhost:3001/api/clients/search?userId=${userId}&q=${searchTerm}`
-        : `http://localhost:3001/api/clients/user/${userId}`;
+        // Step 2: Get all clients by user ID
+        const clientsRes = await fetch(
+          `http://localhost:3001/api/clients/user/${userId}`
+        );
+        if (!clientsRes.ok) throw new Error("Failed to fetch clients");
 
-      fetch(endpoint)
-        .then((res) => res.json())
-        .then((data) => setClients(data))
-        .catch(console.error);
-    }, 500),
-    [userId]
-  );
+        const clientsData = await clientsRes.json();
+        setClients(clientsData);
+      } catch (err: unknown) {
+        let message = "Unexpected error";
 
-  // Trigger search when query changes
-  useEffect(() => {
-    fetchClients(query);
-  }, [query, fetchClients]);
+        if (err instanceof Error) {
+          message = err.message;
+        }
 
-  if (status === "loading") {
-    return <div className="text-center mt-20 text-xl">Loading...</div>;
-  }
+        setError(message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!session) {
-    return (
-      <div className="text-center mt-20 text-red-500 text-xl">
-        Access Denied. You must be logged in to view this page.
-      </div>
-    );
-  }
+    fetchClients();
+  }, [session, status]);
+
+  if (loading) return <div>Loading clients...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
-      <Navbar />
-
-      <div className="flex flex-col items-center justify-center mt-16 mb-12 px-6 text-center">
-        <h1 className="text-6xl font-bold text-[#4e6472] mb-10">My Clients</h1>
-
-        <div className="flex flex-col sm:flex-row items-center gap-6 w-full max-w-2xl">
-          <div className="flex items-center bg-white rounded-full shadow-lg px-6 py-4 w-full">
-            <input
-              type="text"
-              placeholder="Search clients..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="flex-grow outline-none text-[#4e6472] text-xl bg-transparent placeholder:text-[#9aaab2]"
-            />
-            <button className="ml-3 text-[#4e6472] hover:text-[#327b8c] transition-all">
-              <Search className="w-7 h-7" />
-            </button>
-          </div>
-
-          <Link href="/clients/add">
-            <button className="bg-[#327b8c] hover:bg-[#285d69] text-white p-4 rounded-full shadow-lg transition-all">
-              <Plus className="w-7 h-7" />
-            </button>
-          </Link>
-        </div>
-      </div>
-
-      <div className="px-6 pb-20 text-center">
-        {clients.length > 0 ? (
-          <ul className="space-y-6 max-w-2xl mx-auto">
-            {clients.map((client) => (
-              <Link key={client.id} href={`/clients/${client.id}`}>
-                <li className="bg-white p-6 rounded-xl shadow text-left text-[#4e6472] text-xl cursor-pointer hover:bg-gray-100 transition">
-                  <div className="font-bold text-2xl">
-                    {client.first_name} {client.last_name}
-                  </div>
-                  <div>Email: {client.email}</div>
-                  <div>Phone: {client.phone}</div>
-                </li>
-              </Link>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-xl text-gray-700 max-w-xl mx-auto">
-            No matching clients found.
-          </p>
-        )}
-      </div>
+    <div className="p-4">
+      <h1 className="text-2xl font-semibold mb-4">Your Clients</h1>
+      {clients.length === 0 ? (
+        <p>No clients found.</p>
+      ) : (
+        <ul className="space-y-2">
+          {clients.map((client) => (
+            <li key={client.id} className="border p-4 rounded shadow-sm">
+              <p>
+                <strong>Name:</strong> {client.first_name} {client.last_name}
+              </p>
+              <p>
+                <strong>Email:</strong> {client.email}
+              </p>
+              <p>
+                <strong>Phone:</strong> {client.phone}
+              </p>
+              {client.notes && (
+                <p>
+                  <strong>Notes:</strong> {client.notes}
+                </p>
+              )}
+              <p>
+                <strong>Created:</strong>{" "}
+                {new Date(client.created_at).toLocaleString()}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -8,11 +8,17 @@ interface UserRow extends RowDataPacket {
   password: string;
   username: string;
 }
-
 export async function getUserByEmail(email: string) {
+  console.log('🔍 [getUserByEmail] Looking up user with email:', email);
+
   const [rows] = await db.query<UserRow[]>("SELECT * FROM users WHERE email = ?", [email]);
 
-  if (rows.length === 0) return null;
+  console.log('📄 [getUserByEmail] Query result:', rows);
+
+  if (rows.length === 0) {
+    console.warn('⚠️ [getUserByEmail] No user found with email:', email);
+    return null;
+  }
 
   const user = rows[0];
   return {
