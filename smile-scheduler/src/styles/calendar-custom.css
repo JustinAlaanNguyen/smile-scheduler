@@ -1,0 +1,49 @@
+/* src/styles/calendar-custom.css */
+.rbc-calendar {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.rbc-event {
+  background-color: #327b8c !important;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 14px;
+  color: white;
+}
+
+.rbc-toolbar {
+  background-color: #f0f9fa;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.rbc-toolbar-label {
+  color: #4e6472;
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.rbc-off-range {
+  background-color: #f9fbfc;
+}
+
+.rbc-header {
+  color: #4e6472 !important; /* Days of the week (Sun, Mon, etc.) */
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Day numbers inside month view cells */
+.rbc-month-view .rbc-date-cell {
+  color: #4e6472 !important;
+  font-weight: 500;
+}
+
+.rbc-today {
+  background-color: #e2f3f5 !important;
+}
+
+.rbc-selected {
+  background-color: #327b8c !important;
+  color: white !important;
+}

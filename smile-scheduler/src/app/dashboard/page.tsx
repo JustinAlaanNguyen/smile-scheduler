@@ -19,15 +19,6 @@ export default async function Dashboard() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
-      {/* Floating Tooth Decoration
-      <Image
-        src="/tooth-floating.png"
-        alt="Floating Tooth"
-        width={90}
-        height={90}
-        className="absolute top-9 right-30 opacity-30 animate-bounce"
-      /> */}
-
       {/* Navigation Bar */}
       <Navbar />
 

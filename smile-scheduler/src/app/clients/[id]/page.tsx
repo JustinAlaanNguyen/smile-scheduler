@@ -1,8 +1,17 @@
-//clients/[id]/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Navbar from "@/components/Navbar";
-import Link from "next/link";
+import ClientDetails from "@/components/ClientDetails";
+
+interface Client {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  created_at: string;
+  notes?: string;
+}
 
 interface PageProps {
   params: {
@@ -22,8 +31,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
   }
 
   const clientId = params.id;
-
-  let client = null;
+  let client: Client | null = null;
 
   try {
     const res = await fetch(
@@ -33,11 +41,9 @@ export default async function ClientDetailsPage({ params }: PageProps) {
 
     if (res.ok) {
       client = await res.json();
-    } else {
-      console.error("Failed to fetch client details. Status:", res.status);
     }
   } catch (error) {
-    console.error("Error fetching client details:", error);
+    console.error("Error fetching client:", error);
   }
 
   if (!client) {
@@ -51,24 +57,7 @@ export default async function ClientDetailsPage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
       <Navbar />
-      <div className="max-w-2xl mx-auto mt-20 bg-white p-10 rounded-xl shadow text-[#4e6472]">
-        <h1 className="text-4xl font-bold mb-6">
-          {client.first_name} {client.last_name}
-        </h1>
-        <p className="text-xl mb-2">Email: {client.email}</p>
-        <p className="text-xl mb-2">Phone: {client.phone}</p>
-        <p className="text-xl mb-2">Date created: {client.created_at}</p>
-        <hr />
-        <h1 className="text-2xl font-bold mb-5">Notes:</h1>
-        <p className="text-xl">{client.notes}</p>
-      </div>
-      <div className="max-w-2xl mx-auto flex justify-end mt-8">
-        <Link href={`/appointments/create/${clientId}/step1`}>
-          <button className="bg-[#327b8c] hover:bg-[#285d69] text-white px-6 py-3 rounded-xl shadow transition">
-            Book Appointment
-          </button>
-        </Link>
-      </div>
+      <ClientDetails client={client} />
     </div>
   );
 }

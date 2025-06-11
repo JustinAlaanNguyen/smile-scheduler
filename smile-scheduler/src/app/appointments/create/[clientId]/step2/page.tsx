@@ -5,12 +5,13 @@ import { getSession } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import { format, differenceInMinutes, parse } from "date-fns";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AppointmentStep2() {
+  const router = useRouter();
   const { clientId } = useParams() as { clientId: string };
   const searchParams = useSearchParams();
   const date = searchParams?.get("date");
-
   const [userId, setUserId] = useState<number | null>(null);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -28,50 +29,49 @@ export default function AppointmentStep2() {
       const res = await fetch(`http://localhost:3001/api/users/id/${email}`);
       if (!res.ok) throw new Error("Failed to fetch user id");
       const data = await res.json();
-      return data.id; // <-- Change here from user_id to id
+      return data.id;
     } catch (error) {
       console.error("Error fetching user ID:", error);
       return null;
     }
   };
 
-  const fetchClientAndUser = async () => {
-    const session = await getSession();
-    const email = session?.user?.email;
+  useEffect(() => {
+    const fetchClientAndUser = async () => {
+      const session = await getSession();
+      const email = session?.user?.email;
 
-    if (!email) {
-      console.error("No session email found.");
-      return;
-    }
-
-    const id = await fetchUserId(email);
-    if (id === null) {
-      console.error("User ID not fetched.");
-      return;
-    }
-    setUserId(id);
-
-    try {
-      const res = await fetch(
-        `http://localhost:3001/api/clients/client/${clientId}?email=${email}`
-      );
-      if (!res.ok) {
-        console.error("Failed to fetch client details", res.status);
+      if (!email) {
+        console.error("No session email found.");
         return;
       }
-      const data = await res.json();
-      setClient({ first_name: data.first_name, last_name: data.last_name });
-    } catch (err) {
-      console.error("Error fetching client:", err);
-    }
-  };
 
-  useEffect(() => {
+      const id = await fetchUserId(email);
+      if (id === null) {
+        console.error("User ID not fetched.");
+        return;
+      }
+      setUserId(id);
+
+      try {
+        const res = await fetch(
+          `http://localhost:3001/api/clients/client/${clientId}?email=${email}`
+        );
+        if (!res.ok) {
+          console.error("Failed to fetch client details", res.status);
+          return;
+        }
+        const data = await res.json();
+        setClient({ first_name: data.first_name, last_name: data.last_name });
+      } catch (err) {
+        console.error("Error fetching client:", err);
+      }
+    };
+
     if (clientId) fetchClientAndUser();
   }, [clientId]);
 
   const handleBookAppointment = async () => {
-    console.log(clientId, userId, date, startTime, endTime, appointmentType);
     if (
       !clientId ||
       !userId ||
@@ -84,10 +84,15 @@ export default function AppointmentStep2() {
       return;
     }
 
+    const length = calculateLength();
+
+    // ✅ Format the date properly for MySQL DATE column
+    const formattedDate = format(new Date(date), "yyyy-MM-dd");
+
     const appointmentData = {
-      client_id: clientId,
+      client_id: parseInt(clientId),
       user_id: userId,
-      date,
+      date: formattedDate, // ✅ use the formatted date
       start_time: startTime,
       end_time: endTime,
       length: length ?? 0,
@@ -108,6 +113,7 @@ export default function AppointmentStep2() {
         throw new Error(result.error || "Failed to create appointment");
 
       alert("Appointment booked successfully!");
+      router.push("/appointments"); // Redirect to "My Appointments" page
     } catch (err) {
       console.error("Booking error:", err);
       alert("There was an error booking the appointment.");
@@ -222,7 +228,6 @@ export default function AppointmentStep2() {
 
         {/* RIGHT COLUMN */}
         <div className="space-y-6">
-          {/* Client Info */}
           <div className="bg-[#f1f7f9] p-4 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-2">Client</h2>
             {client ? (
@@ -234,7 +239,6 @@ export default function AppointmentStep2() {
             )}
           </div>
 
-          {/* Appointment Type */}
           <div className="bg-[#f1f7f9] p-4 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-2">
               Select Appointment Type
@@ -253,7 +257,6 @@ export default function AppointmentStep2() {
             </select>
           </div>
 
-          {/* Summary */}
           <div className="bg-[#f1f7f9] p-4 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-2">Appointment Summary</h2>
             <ul className="text-sm space-y-1">
@@ -292,6 +295,7 @@ export default function AppointmentStep2() {
             </div>
           </div>
         </div>
+
         <button
           onClick={handleBookAppointment}
           className="bg-[#327b8c] text-white px-6 py-3 rounded-lg hover:bg-[#285f6e]"

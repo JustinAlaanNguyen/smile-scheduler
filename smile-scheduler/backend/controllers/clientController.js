@@ -81,20 +81,62 @@ exports.getClientById = async (req, res) => {
   }
 };
 
-// Search
+// Search clients by user and query
 exports.searchClients = async (req, res) => {
-  const { userId, q } = req.query;
+  const { userId } = req.params;  // use route param now
+  const query = req.query.query || ""; // frontend sends ?query=...
 
   try {
     const [results] = await db.query(
       `SELECT * FROM clients WHERE user_id = ? AND (
         first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR phone LIKE ?
       )`,
-      [userId, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`]
+      [userId, `%${query}%`, `%${query}%`, `%${query}%`, `%${query}%`]
     );
     res.json(results);
   } catch (error) {
+    console.error("Search error:", error);
     res.status(500).json({ message: "Search failed" });
   }
 };
 
+
+//update
+exports.updateClient = async (req, res) => {
+  const { clientId } = req.params;
+  const { first_name, last_name, email, phone, notes } = req.body;
+
+  try {
+    const [result] = await db.query(
+      `UPDATE clients SET first_name = ?, last_name = ?, email = ?, phone = ?, notes = ? WHERE id = ?`,
+      [first_name, last_name, email, phone, notes || null, clientId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
+    res.status(200).json({ message: 'Client updated successfully' });
+  } catch (error) {
+    console.error('Error updating client:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+};
+
+//delete
+exports.deleteClient = async (req, res) => {
+  const { clientId } = req.params;
+
+  try {
+    const [result] = await db.query(`DELETE FROM clients WHERE id = ?`, [clientId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
+    res.status(200).json({ message: 'Client deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting client:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+};

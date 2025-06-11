@@ -9,7 +9,12 @@ router.post('/add', clientController.createClient);
 router.get('/user/:userId', clientController.getClientsByUserId); 
 // GET /api/clients/client/:clientId
 router.get('/client/:clientId', clientController.getClientById);  
-// Search
-router.get("/search", clientController.searchClients);
+// Search Match: /api/clients/user/:userId/search?query=...
+router.get("/user/:userId/search", clientController.searchClients);
+// update
+router.put('/client/:clientId', clientController.updateClient);
+// delete
+router.delete('/client/:clientId', clientController.deleteClient);
+
 
 module.exports = router;

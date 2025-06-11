@@ -60,21 +60,22 @@ exports.deleteUser = (req, res) => {
 
 
 // Get id of user by email
-exports.getUserIdByEmail = (req, res) => {
-  const email = decodeURIComponent(req.params.email); // ✅ correctly accessing req.params.email
+exports.getUserIdByEmail = async (req, res) => {
+  const email = decodeURIComponent(req.params.email);
 
-  db.query('SELECT id FROM users WHERE email = ?', [email], (err, results) => {
+  try {
+    const [results] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
+
     console.log("Requesting userId for email:", email);
-
-    if (err) {
-      console.error('Database error:', err);
-      return res.status(500).json({ error: 'Internal server error' });
-    }
+    console.log("Query results:", results);
 
     if (results.length === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ id: results[0].id });
-  });
+    return res.json({ id: results[0].id });
+  } catch (err) {
+    console.error('Database error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 };
