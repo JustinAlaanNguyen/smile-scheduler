@@ -3,6 +3,8 @@
 
 import { useState } from "react";
 import axios from "axios";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function UserForm() {
   const [showForm, setShowForm] = useState(false);
@@ -14,6 +16,7 @@ export default function UserForm() {
 
   const passwordsMatch =
     password !== "" && confirmPassword !== "" && password === confirmPassword;
+  const router = useRouter();
 
   const createUser = async () => {
     if (!passwordsMatch) {
@@ -22,22 +25,29 @@ export default function UserForm() {
     }
 
     try {
-      await axios.post("http://localhost:3001/api/users", {
+      // Step 1: Create the user
+      await axios.post("http://localhost:3001/api/users/register", {
         username,
         email,
         password,
       });
-      alert("✅ User created!");
-      setUsername("");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-      setError("");
-      setShowForm(false); // optionally hide form after success
+
+      // Step 2: Automatically log them in using NextAuth
+      const res = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (res.ok) {
+        router.push("/dashboard"); // Step 3: Redirect
+      } else {
+        setError(
+          "❌ Account created, but login failed. Please try logging in."
+        );
+      }
     } catch (error) {
       if (error.response) {
-        // Error from backend
-        console.log(error.response);
         const message =
           error.response.data?.error ||
           "Something went wrong. Please try again.";

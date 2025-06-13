@@ -47,3 +47,13 @@
   background-color: #327b8c !important;
   color: white !important;
 }
+
+.appointment-block + .appointment-block {
+  margin-top: 1px; 
+}
+
+.rbc-month-view .rbc-day-bg:hover {
+  background-color: #e0f2f1;
+  transition: background-color 0.2s ease-in-out;
+  cursor: pointer;
+}

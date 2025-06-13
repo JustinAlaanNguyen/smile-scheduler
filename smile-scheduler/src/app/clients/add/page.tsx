@@ -1,6 +1,8 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 
 export default function AddClientPage() {
@@ -73,7 +75,14 @@ export default function AddClientPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
       <Navbar />
-      <div className="max-w-2xl mx-auto mt-20 bg-white p-8 rounded-xl shadow space-y-6">
+
+      {/* Animate form container */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-2xl mx-auto mt-20 bg-white p-8 rounded-xl shadow space-y-6"
+      >
         <h1 className="text-3xl font-bold text-center text-[#4e6472]">
           Add a New Client
         </h1>
@@ -133,52 +142,65 @@ export default function AddClientPage() {
             Cancel
           </button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Confirmation Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg max-w-md w-full shadow-lg space-y-4">
-            <h2 className="text-xl font-semibold text-gray-700">
-              Confirm Client Details
-            </h2>
-            <p className="text-gray-700">
-              <strong>First Name:</strong> {firstName}
-            </p>
-            <p className="text-gray-700">
-              <strong>Last Name:</strong> {lastName}
-            </p>
-            <p className="text-gray-700">
-              <strong>Email:</strong> {email}
-            </p>
-            <p className="text-gray-700">
-              <strong>Phone:</strong> {phone}
-            </p>
-            <p className="text-gray-700">
-              <strong>Notes:</strong> {notes}
-            </p>
-            <div className="mt-4">
-              <p className="text-center mb-4 font-medium text-gray-700">
-                Are the client details correct?
+      {/* Animate modal with AnimatePresence */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-white p-8 rounded-lg max-w-md w-full shadow-lg space-y-4"
+            >
+              <h2 className="text-xl font-semibold text-gray-700">
+                Confirm Client Details
+              </h2>
+              <p className="text-gray-700">
+                <strong>First Name:</strong> {firstName}
               </p>
-              <div className="flex justify-center gap-4">
-                <button
-                  onClick={submitClientToDatabase}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
-                >
-                  Yes, add this client
-                </button>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
-                >
-                  No, continue to edit
-                </button>
+              <p className="text-gray-700">
+                <strong>Last Name:</strong> {lastName}
+              </p>
+              <p className="text-gray-700">
+                <strong>Email:</strong> {email}
+              </p>
+              <p className="text-gray-700">
+                <strong>Phone:</strong> {phone}
+              </p>
+              <p className="text-gray-700">
+                <strong>Notes:</strong> {notes}
+              </p>
+              <div className="mt-4">
+                <p className="text-center mb-4 font-medium text-gray-700">
+                  Are the client details correct?
+                </p>
+                <div className="flex justify-center gap-4">
+                  <button
+                    onClick={submitClientToDatabase}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
+                  >
+                    Yes, add this client
+                  </button>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+                  >
+                    No, continue to edit
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

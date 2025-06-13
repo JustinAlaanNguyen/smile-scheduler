@@ -14,4 +14,5 @@ router.delete('/delete/:id', userController.deleteUser);
   
 router.get('/id/:email', userController.getUserIdByEmail);
 
+router.get('/:email', userController.getUserByEmail);
 module.exports = router;

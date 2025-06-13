@@ -32,14 +32,25 @@ exports.createUser = async (req, res) => {
 // Update account
 exports.updateUser = async (req, res) => {
   const { username, email, password } = req.body;
+  const id = req.params.id;
 
   try {
-    // Hash the password before saving
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const sql = 'UPDATE users SET username=?, email=?, password=? WHERE id=?';
+    let sql, params;
 
-    db.query(sql, [username, email, hashedPassword, req.params.id], (err) => {
-      if (err) return res.status(500).send(err);
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      sql = 'UPDATE users SET username=?, email=?, password=? WHERE id=?';
+      params = [username, email, hashedPassword, id];
+    } else {
+      sql = 'UPDATE users SET username=?, email=? WHERE id=?';
+      params = [username, email, id];
+    }
+
+    db.query(sql, params, (err) => {
+      if (err) {
+        console.error('Update DB error:', err);
+        return res.status(500).send(err);
+      }
       res.send('User updated successfully');
     });
   } catch (error) {
@@ -49,13 +60,25 @@ exports.updateUser = async (req, res) => {
 };
 
 
-// Delete account
-exports.deleteUser = (req, res) => {
-  const sql = 'DELETE FROM users WHERE id=?';
-  db.query(sql, [req.params.id], (err) => {
-    if (err) return res.status(500).send(err);
-    res.send('User deleted successfully');
-  });
+// Delete account and all related appointments/clients// Delete account and related data
+exports.deleteUser = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    // Delete appointments linked to the user
+    await db.query('DELETE FROM appointments WHERE user_id = ?', [userId]);
+
+    // Delete clients linked to the user
+    await db.query('DELETE FROM clients WHERE user_id = ?', [userId]);
+
+    // Delete the user
+    await db.query('DELETE FROM users WHERE id = ?', [userId]);
+
+    res.send('User and related data deleted successfully');
+  } catch (err) {
+    console.error('Error deleting user:', err);
+    res.status(500).json({ error: 'Failed to delete user and related data' });
+  }
 };
 
 
@@ -74,6 +97,26 @@ exports.getUserIdByEmail = async (req, res) => {
     }
 
     return res.json({ id: results[0].id });
+  } catch (err) {
+    console.error('Database error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.getUserByEmail = async (req, res) => {
+  const email = decodeURIComponent(req.params.email);
+
+  try {
+    const [results] = await db.query(
+      'SELECT id, username, email, role, created_at FROM users WHERE email = ?',
+      [email]
+    );
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json(results[0]);
   } catch (err) {
     console.error('Database error:', err);
     return res.status(500).json({ error: 'Internal server error' });

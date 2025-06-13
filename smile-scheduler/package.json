@@ -12,7 +12,7 @@
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "date-fns": "^4.1.0",
-    "framer-motion": "^12.15.0",
+    "framer-motion": "^12.17.3",
     "jotai": "^2.12.2",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.507.0",

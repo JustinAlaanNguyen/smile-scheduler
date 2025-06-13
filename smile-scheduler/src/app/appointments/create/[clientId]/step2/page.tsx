@@ -23,6 +23,7 @@ export default function AppointmentStep2() {
     "new patient" | "scale" | "recall" | ""
   >("");
   const [notes, setNotes] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const fetchUserId = async (email: string): Promise<number | null> => {
     try {
@@ -35,6 +36,31 @@ export default function AppointmentStep2() {
       return null;
     }
   };
+
+  const [existingAppointments, setExistingAppointments] = useState<
+    { appointment_start: string; appointment_end: string }[]
+  >([]);
+
+  useEffect(() => {
+    const fetchAppointmentsForDate = async () => {
+      if (!userId || !date) return;
+
+      const formattedDate = format(new Date(date), "yyyy-MM-dd");
+
+      try {
+        const res = await fetch(
+          `http://localhost:3001/api/appointments/user/${userId}/date/${formattedDate}`
+        );
+        const data = await res.json();
+        console.log("Fetched appointments:", data);
+        setExistingAppointments(data);
+      } catch (err) {
+        console.error("Error fetching appointments for date:", err);
+      }
+    };
+
+    fetchAppointmentsForDate();
+  }, [userId, date]);
 
   useEffect(() => {
     const fetchClientAndUser = async () => {
@@ -109,14 +135,20 @@ export default function AppointmentStep2() {
 
       const result = await res.json();
 
-      if (!res.ok)
-        throw new Error(result.error || "Failed to create appointment");
+      if (!res.ok) {
+        if (res.status === 409) {
+          setErrorMessage(result.error); // show overlap error
+        } else {
+          setErrorMessage(result.error || "Failed to create appointment");
+        }
+        return;
+      }
 
       alert("Appointment booked successfully!");
       router.push("/appointments"); // Redirect to "My Appointments" page
     } catch (err) {
       console.error("Booking error:", err);
-      alert("There was an error booking the appointment.");
+      setErrorMessage("There was an error booking the appointment.");
     }
   };
 
@@ -157,6 +189,7 @@ export default function AppointmentStep2() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
       <Navbar />
+
       <div className="max-w-6xl mx-auto mt-10 p-6 bg-white rounded-xl shadow text-[#4e6472] grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* LEFT COLUMN */}
         <div>
@@ -199,7 +232,16 @@ export default function AppointmentStep2() {
               </p>
             )}
           </div>
-
+          <div className="flex gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-[#327b8c] rounded-sm"></div>
+              <span>Selected</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-300 rounded-sm"></div>
+              <span>Booked</span>
+            </div>
+          </div>
           <div className="border rounded-lg p-4 max-h-[400px] overflow-y-auto bg-[#f9f9f9]">
             <div className="grid grid-cols-4 gap-2 text-sm font-medium mb-2 text-[#4e6472]">
               <span>Time</span>
@@ -209,12 +251,30 @@ export default function AppointmentStep2() {
               const isInRange =
                 startTime && endTime && slot >= startTime && slot < endTime;
 
+              // Check if this slot overlaps with any existing appointment
+              const isBooked = existingAppointments.some((appt) => {
+                const slotTime = parse(slot, "HH:mm", new Date());
+                const apptStart = parse(
+                  appt.appointment_start,
+                  "HH:mm:ss",
+                  new Date()
+                );
+                const apptEnd = parse(
+                  appt.appointment_end,
+                  "HH:mm:ss",
+                  new Date()
+                );
+                return slotTime >= apptStart && slotTime < apptEnd;
+              });
+
               return (
                 <div
                   key={slot}
                   className={`grid grid-cols-4 gap-2 py-1 px-2 rounded ${
                     isInRange
                       ? "bg-[#327b8c] text-white"
+                      : isBooked
+                      ? "bg-red-300 text-white" // You can use a different color
                       : "hover:bg-gray-100 text-[#4e6472]"
                   }`}
                 >
@@ -295,6 +355,12 @@ export default function AppointmentStep2() {
             </div>
           </div>
         </div>
+
+        {errorMessage && (
+          <div className="col-span-2 text-center text-red-600 font-medium">
+            {errorMessage}
+          </div>
+        )}
 
         <button
           onClick={handleBookAppointment}
