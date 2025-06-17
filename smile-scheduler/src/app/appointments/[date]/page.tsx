@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
 import moment from "moment";
 import Navbar from "@/components/Navbar";
-import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 type Appointment = {
   id: number;
@@ -22,12 +22,27 @@ type HourBlock = {
   startHour: number;
   endHour: number;
   appointment: Appointment;
+  color: string;
 };
+
+const colorPalette = [
+  "#327b8c",
+  "#00897b",
+  "#5e35b1",
+  "#c62828",
+  "#ef6c00",
+  "#2e7d32",
+  "#3949ab",
+  "#d81b60",
+  "#6d4c41",
+  "#00acc1",
+];
 
 const DayAppointments = () => {
   const { date: dateParam } = useParams() as { date: string | string[] };
   const date = Array.isArray(dateParam) ? dateParam[0] : dateParam;
   const router = useRouter();
+
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null);
@@ -54,7 +69,7 @@ const DayAppointments = () => {
 
   const hours = Array.from({ length: 15 }, (_, i) => 6 + i);
 
-  const bookedBlocks: HourBlock[] = appointments.map((app) => {
+  const bookedBlocks: HourBlock[] = appointments.map((app, index) => {
     const start = moment(
       `${date} ${app.appointment_start}`,
       "YYYY-MM-DD HH:mm:ss"
@@ -64,6 +79,7 @@ const DayAppointments = () => {
       startHour: start.hour(),
       endHour: end.hour(),
       appointment: app,
+      color: colorPalette[index % colorPalette.length],
     };
   });
 
@@ -81,16 +97,21 @@ const DayAppointments = () => {
             <p className="text-center text-lg">Loading...</p>
           ) : (
             <div className="flex flex-col">
-              {hours.map((hour) => {
+              {hours.map((hour, i) => {
                 const block = bookedBlocks.find(
                   (b) => hour >= b.startHour && hour < b.endHour
                 );
                 const isStart = block?.startHour === hour;
                 const isEnd = block ? block.endHour - 1 === hour : false;
 
-                const bgClass = block
-                  ? "bg-[#327b8c] text-white hover:bg-[#285d6d] cursor-pointer"
-                  : "bg-gray-200";
+                const bgStyle = block
+                  ? {
+                      backgroundColor: block.color,
+                      color: "#fff",
+                      cursor: "pointer",
+                    }
+                  : { backgroundColor: "#e5e7eb" };
+
                 const roundedClass = block
                   ? isStart && isEnd
                     ? "rounded-lg"
@@ -102,8 +123,11 @@ const DayAppointments = () => {
                   : "rounded-lg";
 
                 return (
-                  <div
+                  <motion.div
                     key={hour}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.03 }}
                     className="flex items-center px-4 mb-1"
                     style={{ marginTop: "-1px" }}
                   >
@@ -111,7 +135,8 @@ const DayAppointments = () => {
                       {moment().hour(hour).minute(0).format("h:00 A")}
                     </div>
                     <div
-                      className={`flex-1 ml-4 h-12 p-2 shadow-inner ${bgClass} ${roundedClass}`}
+                      className={`flex-1 ml-4 h-12 p-2 shadow-inner ${roundedClass}`}
+                      style={bgStyle}
                       onClick={() =>
                         block && setSelectedAppointment(block.appointment)
                       }
@@ -132,7 +157,7 @@ const DayAppointments = () => {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -141,7 +166,12 @@ const DayAppointments = () => {
 
         {/* Side Panel */}
         {selectedAppointment && (
-          <div className="w-80 ml-6 bg-white rounded-lg shadow-lg p-5 animate-slide-in">
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="w-80 ml-6 bg-white rounded-lg shadow-lg p-5"
+          >
             <h2 className="text-xl font-bold mb-4 text-[#327b8c]">
               Appointment Details
             </h2>
@@ -169,7 +199,6 @@ const DayAppointments = () => {
                 "h:mm A"
               )}
             </p>
-
             <p className="mt-2 text-[#327b8c]">
               <strong>Notes:</strong> {selectedAppointment.notes || "N/A"}
             </p>
@@ -190,7 +219,7 @@ const DayAppointments = () => {
                 Close Panel
               </button>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
 
@@ -202,24 +231,6 @@ const DayAppointments = () => {
           ← Back to Calendar
         </button>
       </div>
-
-      {/* Add animation styles */}
-      <style jsx>{`
-        .animate-slide-in {
-          animation: slideIn 0.3s ease-out forwards;
-        }
-
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-      `}</style>
     </div>
   );
 };

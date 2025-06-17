@@ -1,33 +1,38 @@
 //backend/controllers/userController.js
 const bcrypt = require('bcrypt');
 const db = require('../db');
+const sendEmail = require('../utils/email');
 
 // Create account
 exports.createUser = async (req, res) => {
-    const { username, email, password } = req.body;
-  
-    try {
-      // Hash the password (10 salt rounds is standard)
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      // Save user to DB with hashed password
-      const query = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-      db.query(query, [username, email, hashedPassword], (err, results) => {
-        if (err) {
-          console.error('DB error:', err);
-          if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ error: 'Email already exists' });
-          }
-          return res.status(500).json({ error: 'Database error' });
-        }
-  
-        return res.status(201).json({ message: 'User created successfully!' });
-      });
-    } catch (error) {
-      console.error('Hashing error:', error);
-      return res.status(500).json({ error: 'Internal server error' });
-    }
-  };
+  const { username, email, password } = req.body;
+
+  try {
+    // 1. Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 2. Save user to DB
+    const query = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
+    await db.query(query, [username, email, hashedPassword]);
+
+    // 3. Send welcome email
+    await sendEmail({
+      to: email,
+      subject: 'Welcome to Smile Scheduler!',
+      html: `
+        <h2>Welcome, ${username}!</h2>
+        <p>Thanks for creating an account on <strong>Smile Scheduler</strong>.</p>
+        <p>You can now log in and start adding clients and booking appointments! 💫</p>
+      `,
+    });
+
+    // 4. Respond success
+    res.status(201).json({ message: 'User created and welcome email sent!' });
+  } catch (err) {
+    console.error('Create user error:', err);
+    res.status(500).json({ error: 'User creation failed.' });
+  }
+};
 
 // Update account
 exports.updateUser = async (req, res) => {

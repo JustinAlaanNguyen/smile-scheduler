@@ -1,4 +1,5 @@
 //server.js
+require('dotenv').config();
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
