@@ -94,7 +94,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <Link
-                  href="#"
+                  href="/appointments"
                   className="text-2xl font-semibold text-[#327b8c] hover:underline flex items-center gap-2 hover:ring-2 hover:ring-[#9dc7d4] rounded px-2 py-1 transition-all"
                 >
                   <CalendarCheck className="w-6 h-6 text-[#4e6c71]" />{" "}
@@ -106,7 +106,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <Link
-                  href="#"
+                  href="/profile"
                   className="text-2xl font-semibold text-[#327b8c] hover:underline flex items-center gap-2 hover:ring-2 hover:ring-[#9dc7d4] rounded px-2 py-1 transition-all"
                 >
                   <Bell className="w-6 h-6 text-[#4e6c71]" /> Enable Email

@@ -14,5 +14,14 @@ router.delete('/delete/:id', userController.deleteUser);
   
 router.get('/id/:email', userController.getUserIdByEmail);
 
-router.get('/:email', userController.getUserByEmail);
+//router.get('/:email', userController.getUserByEmail);
+router.get('/by-email/:email', userController.getUserByEmail);
+
+router.put('/notifications/enable', userController.enableNotifications);
+
+router.put('/toggle-notifications/:userId', userController.toggleNotifications);
+
+// Email verification
+router.get('/verify', userController.verifyEmail);
+
 module.exports = router;

@@ -1,12 +1,15 @@
+// backend/utils/dbHelpers.js
+
 const db = require('../db');
 
-async function getUserEmailById(userId) {
-  const [results] = await db.query('SELECT email FROM users WHERE id = ?', [userId]);
-  if (results.length === 0) {
-    throw new Error(`No user found with ID ${userId}`);
-  }
-  return results[0].email;
-}
+const getUserEmailById = async (userId) => {
+  const [rows] = await db.query(
+    "SELECT email, email_notifications_enabled FROM users WHERE id = ?",
+    [userId]
+  );
+  if (rows.length === 0) return null;
+  return rows[0]; // { email, email_notifications_enabled }
+};
 
 module.exports = {
   getUserEmailById,

@@ -7,6 +7,7 @@ interface UserRow extends RowDataPacket {
   email: string;
   password: string;
   username: string;
+  email_verified: boolean;
 }
 export async function getUserByEmail(email: string) {
   console.log('🔍 [getUserByEmail] Looking up user with email:', email);
@@ -26,5 +27,6 @@ export async function getUserByEmail(email: string) {
     email: user.email,
     password: user.password,
     username: user.username,
+    email_verified: user.email_verified,
   };
 }

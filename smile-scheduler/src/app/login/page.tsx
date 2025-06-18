@@ -1,13 +1,24 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showMessage, setShowMessage] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const justRegistered = searchParams?.get("justRegistered") === "true";
+    const verified = searchParams?.get("verified") === "true";
+
+    if (justRegistered || verified) {
+      setShowMessage(true);
+    }
+  }, [searchParams]);
 
   const handleLogin = async () => {
     const res = await signIn("credentials", {
@@ -16,7 +27,9 @@ export default function LoginPage() {
       redirect: false,
     });
 
-    if (res?.ok) {
+    if (res?.error === "Please verify your email before logging in.") {
+      alert("⚠️ Please verify your email before logging in.");
+    } else if (res?.ok) {
       router.push("/dashboard");
     } else {
       alert("❌ Login failed. Check your credentials.");
@@ -27,6 +40,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#9BC5D4] px-4">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md flex flex-col items-center gap-4">
         <h1 className="text-2xl font-semibold text-blue-700">Login</h1>
+
+        {showMessage && (
+          <div className="w-full bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-sm">
+            ✅ Account created successfully. Please log in.
+          </div>
+        )}
+
         <input
           type="email"
           placeholder="Email"

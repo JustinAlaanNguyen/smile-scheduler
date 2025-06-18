@@ -1,4 +1,4 @@
-// route.ts
+// [...nestauth]/route.ts
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
@@ -13,21 +13,26 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing email or password");
-        }
-      
-        const { email, password } = credentials;
-      
-        const user = await getUserByEmail(email);
-        if (!user) throw new Error("No user found");
-      
-        const isValid = await compare(password, user.password);
-        if (!isValid) throw new Error("Invalid password");
-      
-        return { id: String(user.id), email: user.email, name: user.username };
+  if (!credentials?.email || !credentials?.password) {
+    throw new Error("Missing email or password");
+  }
 
-      }
+  const { email, password } = credentials;
+
+  const user = await getUserByEmail(email);
+  if (!user) throw new Error("No user found");
+
+  // ✅ Add this check:
+  if (!user.email_verified) {
+    throw new Error("Please verify your email before logging in.");
+  }
+
+  const isValid = await compare(password, user.password);
+  if (!isValid) throw new Error("Invalid password");
+
+  return { id: String(user.id), email: user.email, name: user.username };
+}
+
     }),
   ],
   session: {

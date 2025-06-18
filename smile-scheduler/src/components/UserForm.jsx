@@ -1,9 +1,7 @@
-//UserForm.jsx
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function UserForm() {
@@ -13,50 +11,13 @@ export default function UserForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const usernameRef = useRef(null);
+  const router = useRouter();
 
   const passwordsMatch =
     password !== "" && confirmPassword !== "" && password === confirmPassword;
-  const router = useRouter();
-
-  const createUser = async () => {
-    if (!passwordsMatch) {
-      setError("❌ Passwords do not match.");
-      return;
-    }
-
-    try {
-      // Step 1: Create the user
-      await axios.post("http://localhost:3001/api/users/register", {
-        username,
-        email,
-        password,
-      });
-
-      // Step 2: Automatically log them in using NextAuth
-      const res = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
-
-      if (res.ok) {
-        router.push("/dashboard"); // Step 3: Redirect
-      } else {
-        setError(
-          "❌ Account created, but login failed. Please try logging in."
-        );
-      }
-    } catch (error) {
-      if (error.response) {
-        const message =
-          error.response.data?.error ||
-          "Something went wrong. Please try again.";
-        setError(`❌ ${message}`);
-      } else {
-        setError("❌ Server not responding. Please try again later.");
-      }
-    }
-  };
 
   const isFormValid =
     username.trim() !== "" &&
@@ -64,6 +25,35 @@ export default function UserForm() {
     password !== "" &&
     confirmPassword !== "" &&
     passwordsMatch;
+
+  const createUser = async () => {
+    if (!passwordsMatch) {
+      setError("❌ Passwords do not match.");
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    try {
+      await axios.post("http://localhost:3001/api/users/register", {
+        username,
+        email,
+        password,
+      });
+
+      router.push("/login?justRegistered=true");
+    } catch (error) {
+      console.error("Registration error:", error?.response?.data);
+      const message =
+        error.response?.data?.error ||
+        "Something went wrong. Please try again.";
+      setError(`❌ ${message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto mt-8 flex flex-col items-center gap-4">
       <button
@@ -73,20 +63,22 @@ export default function UserForm() {
         Login
       </button>
 
-      {/* Toggle Form Button */}
       {!showForm && (
         <button
           className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setShowForm(true);
+            setTimeout(() => usernameRef.current?.focus(), 100);
+          }}
         >
           Create an Account
         </button>
       )}
 
-      {/* User Form */}
       {showForm && (
         <>
           <input
+            ref={usernameRef}
             className="border border-black p-2 rounded w-full text-black"
             type="text"
             placeholder="Username"
@@ -135,7 +127,6 @@ export default function UserForm() {
             </p>
           )}
 
-          {/* Styled Error */}
           {error && (
             <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">
               {error}
@@ -144,14 +135,14 @@ export default function UserForm() {
 
           <button
             className={`p-2 w-full rounded text-white ${
-              isFormValid
+              isFormValid && !loading
                 ? "bg-blue-500 hover:bg-blue-600"
                 : "bg-gray-400 cursor-not-allowed"
             }`}
             onClick={createUser}
-            disabled={!isFormValid}
+            disabled={!isFormValid || loading}
           >
-            Create Account
+            {loading ? "Creating..." : "Create Account"}
           </button>
 
           <button

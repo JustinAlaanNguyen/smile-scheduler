@@ -1,3 +1,5 @@
+//profile/page
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -25,22 +27,40 @@ export default function MyProfilePage() {
   const [showPassword, setShowPassword] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
 
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  // Fetch notification state
   useEffect(() => {
     const fetchUser = async () => {
       if (!session?.user?.email) return;
       const res = await fetch(
-        `http://localhost:3001/api/users/${encodeURIComponent(
-          session.user.email
-        )}`
+        `http://localhost:3001/api/users/by-email/${encodeURIComponent(session.user.email)}`
       );
       const data = await res.json();
       setUser(data);
       setUsername(data.username);
       setEmail(data.email);
+      setNotificationsEnabled(data.email_notifications_enabled); // 👈
     };
 
     fetchUser();
   }, [session]);
+
+  // Toggle handler
+  const handleToggleNotifications = async () => {
+    if (!user) return;
+    const res = await fetch(
+      `http://localhost:3001/api/users/toggle-notifications/${user.id}`,
+      { method: "PUT" }
+    );
+
+    if (res.ok) {
+      const data = await res.json();
+      setNotificationsEnabled(data.email_notifications_enabled);
+    } else {
+      alert("❌ Failed to toggle notifications");
+    }
+  };
 
   const handleUpdate = async () => {
     if (!user) return;
@@ -157,6 +177,22 @@ export default function MyProfilePage() {
           <p className="text-sm text-gray-600">
             Role: <strong>{user.role}</strong>
           </p>
+          <div className="mt-6 text-center">
+            <p className="mb-2">
+              Email Notifications:{" "}
+              <strong>
+                {notificationsEnabled ? "Enabled ✅" : "Disabled ❌"}
+              </strong>
+            </p>
+            <button
+              onClick={handleToggleNotifications}
+              className="bg-[#327b8c] text-white px-6 py-2 rounded hover:bg-[#285f6e]"
+            >
+              {notificationsEnabled
+                ? "Disable Notifications"
+                : "Enable Notifications"}
+            </button>
+          </div>
 
           {!editMode ? (
             <button
@@ -195,6 +231,7 @@ export default function MyProfilePage() {
           )}
         </div>
       </div>
+
       <div className="max-w-xl mx-auto mt-6 text-center">
         <button
           onClick={() => signOut({ callbackUrl: "/" })}

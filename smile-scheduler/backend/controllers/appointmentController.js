@@ -48,7 +48,7 @@ exports.createAppointment = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    const userEmail = await getUserEmailById(user_id);
+    const userInfo = await getUserEmailById(user_id);
 
     // Overlap check
     const overlapQuery = `
@@ -116,11 +116,14 @@ exports.createAppointment = async (req, res) => {
       </ul>
     `;
 
-    await sendAppointmentEmail({
-      to: userEmail,
-      subject: `${formatDate(date)} - New appointment has been added!`,
-      html,
-    });
+   
+if (userInfo?.email_notifications_enabled) {
+  await sendAppointmentEmail({
+    to: userInfo.email,
+    subject: `${formatDate(date)} - New appointment has been added!`,
+    html,
+  });
+}
 
     res.status(201).json({ message: "Appointment created successfully" });
   } catch (error) {
@@ -213,7 +216,7 @@ exports.updateAppointment = async (req, res) => {
   }
 
   try {
-    const userEmail = await getUserEmailById(user_id);
+    const userInfo = await getUserEmailById(user_id);
 
     // Check for overlaps
     const overlapQuery = `
@@ -284,11 +287,13 @@ exports.updateAppointment = async (req, res) => {
       </ul>
     `;
 
-    await sendAppointmentEmail({
-      to: userEmail,
-      subject: `${formatDate(date)} - Updated appointment!`,
-      html,
-    });
+    if (userInfo?.email_notifications_enabled) {
+  await sendAppointmentEmail({
+    to: userInfo.email,
+    subject: `${formatDate(date)} - Updated appointment!`,
+    html,
+  });
+}
 
     res.json({ message: "Appointment updated successfully" });
   } catch (error) {
@@ -316,7 +321,8 @@ exports.deleteAppointment = async (req, res) => {
     }
 
     const deletedAppt = apptResult[0];
-    const userEmail = await getUserEmailById(deletedAppt.user_id);
+    const userInfo = await getUserEmailById(deletedAppt.user_id);
+
 
     await db.query("DELETE FROM appointments WHERE id = ?", [appointmentId]);
 
@@ -357,11 +363,14 @@ exports.deleteAppointment = async (req, res) => {
 
 
 
-    await sendAppointmentEmail({
-      to: userEmail,
-      subject: `${formattedDate} - Appointment deleted`,
-      html,
-    });
+    if (userInfo?.email_notifications_enabled) {
+  await sendAppointmentEmail({
+    to: userInfo.email,
+    subject: `${formattedDate} - Appointment deleted`,
+    html,
+  });
+}
+
 
     res.json({ message: "Appointment deleted successfully" });
   } catch (error) {
