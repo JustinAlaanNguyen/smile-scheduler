@@ -1,163 +1,251 @@
-//app page.tsx
 "use client";
 
-import { useState } from "react";
-import UserForm from "../components/UserForm";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Comfortaa } from "next/font/google";
+import { motion, AnimatePresence } from "framer-motion";
 
 const comfortaa = Comfortaa({ subsets: ["latin"], weight: ["400", "700"] });
 
 export default function Home() {
   const [clientIndex, setClientIndex] = useState(0);
   const [apptIndex, setApptIndex] = useState(0);
+  const [isClientHovered, setIsClientHovered] = useState(false);
+  const [isApptHovered, setIsApptHovered] = useState(false);
 
-  const clientImages = [
+  const clientMedia = [
     {
-      src: "/smilSchedHomePage.jpg",
-      title: "Create your own clientele database!",
-      desc: "Add new clients with details like name, and preferences to build your personal client base.",
+      type: "video",
+      src: "/videos/Createclient.mp4",
+      title: "Client Management Made Easy",
+      desc: "Add, view, update, and delete client profiles to build a powerful database.",
     },
     {
-      src: "/logo.jpg",
-      title: "View, edit, and delete unlimited client profiles!",
-      desc: "Manage client information—make updates, remove profiles, and keep everything organized in one place.",
+      type: "video",
+      src: "/videos/Viewclient.mp4",
+      title: "Effortless Client Viewing",
+      desc: "Quickly view detailed client information and history with just a click.",
     },
   ];
 
   const apptImages = [
     {
-      src: "/smilSchedHomePage.jpg",
-      title: "Manage your own appointment schedule!",
-      desc: "Schedule appointments by selecting a client and choosing a date and time that works best.",
+      type: "video",
+      src: "/videos/Createappoint.mp4",
+      title: "Create Appointments Easily",
+      desc: "Select a client, date, and time to book appointments quickly and clearly.",
     },
     {
-      src: "/logo.jpg",
-      title: "Stay up to date with any changes to your schedule!",
-      desc: "Quickly update, reschedule, or cancel appointments and view your updated agenda in real time.",
+      type: "video",
+      src: "/videos/Viewappoint.mp4",
+      title: "Manage Appointments Effortlessly",
+      desc: "Update, reschedule, or cancel with real-time updates.",
     },
   ];
 
-  const nextClient = () =>
-    setClientIndex((prev) => (prev + 1) % clientImages.length);
-  const prevClient = () =>
-    setClientIndex((prev) => (prev === 0 ? clientImages.length - 1 : prev - 1));
+  useEffect(() => {
+    if (!isClientHovered) {
+      const interval = setInterval(() => {
+        setClientIndex((prev) => (prev + 1) % clientMedia.length);
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [isClientHovered, clientMedia.length]);
 
-  const nextAppt = () => setApptIndex((prev) => (prev + 1) % apptImages.length);
-  const prevAppt = () =>
-    setApptIndex((prev) => (prev === 0 ? apptImages.length - 1 : prev - 1));
+  useEffect(() => {
+    if (!isApptHovered) {
+      const interval = setInterval(() => {
+        setApptIndex((prev) => (prev + 1) % apptImages.length);
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [isApptHovered, apptImages.length]);
 
   return (
-    <div className="min-h-screen p-8 sm:p-20 bg-[#9BC5D4] grid grid-rows-[auto_1fr_auto] gap-8 justify-items-center font-sans">
-      <header>
+    <div className="min-h-screen bg-gradient-to-b from-[#9dc7d4] via-white to-[#9dc7d4] text-gray-800 font-sans">
+      {/* Header */}
+      <header className="flex justify-between items-center px-6 py-4 bg-[#9dc7d4] shadow-md">
         <Image
           src="/homePage.png"
           alt="Smile Scheduler Logo"
-          width={500}
-          height={38}
+          width={200}
+          height={40}
           priority
         />
+        <div className="flex gap-4">
+          <Link href="/login">
+            <button className="px-5 py-2 rounded-lg bg-[#327b8c] text-white hover:bg-[#285d69] transition duration-200">
+              Login
+            </button>
+          </Link>
+          <Link href="/register">
+            <button className="px-5 py-2 rounded-lg bg-[#5cb5c9] text-white hover:bg-[#3c95a8] transition duration-200">
+              Create Account
+            </button>
+          </Link>
+        </div>
       </header>
-      <main className="w-full max-w-6xl">
-        <UserForm />
 
-        <div className="flex flex-col md:flex-row justify-center gap-8 mt-12 w-full">
-          {/* Client Section */}
-          <div className="w-full md:w-1/2 bg-white p-4 md:p-6 rounded-lg shadow-md min-h-[250px] relative">
-            <h2
-              className={`text-3xl font-bold tracking-tight mb-1 text-center text-blue-700 ${comfortaa.className}`}
-            >
-              {clientImages[clientIndex].title}
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+        {/* Welcome */}
+        <section className="text-center">
+          <h1
+            className={`text-5xl font-bold mb-4 text-[#327b8c] ${comfortaa.className}`}
+          >
+            Welcome to Smile Scheduler
+          </h1>
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+            Your all-in-one tool to manage clients and schedule appointments
+            with ease.
+          </p>
+        </section>
+
+        {/* Client Section */}
+        <section
+          onMouseEnter={() => setIsClientHovered(true)}
+          onMouseLeave={() => setIsClientHovered(false)}
+          className="grid md:grid-cols-2 gap-10 items-center bg-white p-8 rounded-2xl shadow-xl"
+        >
+          <div>
+            <h2 className="text-3xl font-bold text-[#327b8c] mb-2">
+              {clientMedia[clientIndex].title}
             </h2>
-            <p
-              className={`text-xl mb-3 text-center text-blue-300 ${comfortaa.className}`}
-            >
-              {clientImages[clientIndex].desc}
+            <p className="text-lg text-gray-700">
+              {clientMedia[clientIndex].desc}
             </p>
-            <div className="overflow-hidden relative">
-              <div
-                className="flex transition-transform duration-500"
-                style={{
-                  width: `${clientImages.length * 100}%`,
-                  transform: `translateX(-${
-                    clientIndex * (200 / clientImages.length)
-                  }%)`,
-                }}
-              >
-                {clientImages.map((img, i) => (
-                  <div key={i} className="w-full flex-shrink-0">
-                    <Image
-                      src={img.src}
-                      alt={`Client step ${i + 1}`}
-                      width={510}
-                      height={180}
-                    />
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={prevClient}
-                className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-300 rounded-full p-2 text-blue-700"
-              >
-                ←
-              </button>
-              <button
-                onClick={nextClient}
-                className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-300 rounded-full p-2 text-blue-700"
-              >
-                →
-              </button>
-            </div>
           </div>
 
-          {/* Appointment Section */}
-          <div className="w-full md:w-1/2 bg-white p-4 md:p-6 rounded-lg shadow-md min-h-[250px] relative">
-            <h2
-              className={`text-3xl font-bold tracking-tight mb-1 text-center text-blue-700 ${comfortaa.className}`}
-            >
+          <div className="relative w-full h-[300px] rounded-lg overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={clientIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="w-full h-full"
+              >
+                {clientMedia[clientIndex].type === "video" ? (
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source
+                      src={clientMedia[clientIndex].src}
+                      type="video/mp4"
+                    />
+                  </video>
+                ) : (
+                  <Image
+                    src={clientMedia[clientIndex].src}
+                    alt="Client preview"
+                    fill
+                    className="object-cover"
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {isClientHovered && (
+              <>
+                <button
+                  onClick={() =>
+                    setClientIndex((prev) =>
+                      prev === 0 ? clientMedia.length - 1 : prev - 1
+                    )
+                  }
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-70 text-black p-2 rounded-full hover:bg-opacity-100 transition"
+                >
+                  ◀
+                </button>
+                <button
+                  onClick={() =>
+                    setClientIndex((prev) => (prev + 1) % clientMedia.length)
+                  }
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-70 text-black p-2 rounded-full hover:bg-opacity-100 transition"
+                >
+                  ▶
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+
+        {/* Appointment Section */}
+        <section
+          onMouseEnter={() => setIsApptHovered(true)}
+          onMouseLeave={() => setIsApptHovered(false)}
+          className="grid md:grid-cols-2 gap-10 items-center bg-white p-8 rounded-2xl shadow-xl"
+        >
+          <div>
+            <h2 className="text-3xl font-bold text-[#327b8c] mb-2">
               {apptImages[apptIndex].title}
             </h2>
-            <p
-              className={`text-xl mb-3 text-center text-blue-300 ${comfortaa.className}`}
-            >
+            <p className="text-lg text-gray-700">
               {apptImages[apptIndex].desc}
             </p>
-            <div className="overflow-hidden relative">
-              <div
-                className="flex transition-transform duration-500"
-                style={{
-                  width: `${apptImages.length * 100}%`,
-                  transform: `translateX(-${
-                    apptIndex * (200 / apptImages.length)
-                  }%)`,
-                }}
-              >
-                {apptImages.map((img, i) => (
-                  <div key={i} className="w-full flex-shrink-0">
-                    <Image
-                      src={img.src}
-                      alt={`Appt step ${i + 1}`}
-                      width={510}
-                      height={180}
-                    />
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={prevAppt}
-                className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-300 rounded-full p-2 text-blue-700"
-              >
-                ←
-              </button>
-              <button
-                onClick={nextAppt}
-                className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-300 rounded-full p-2 text-blue-700"
-              >
-                →
-              </button>
-            </div>
           </div>
-        </div>
+
+          <div className="relative w-full h-[300px] rounded-lg overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={apptIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="w-full h-full"
+              >
+                {apptImages[apptIndex].type === "video" ? (
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    <source src={apptImages[apptIndex].src} type="video/mp4" />
+                  </video>
+                ) : (
+                  <Image
+                    src={apptImages[apptIndex].src}
+                    alt="Appointment preview"
+                    fill
+                    className="object-cover"
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {isApptHovered && (
+              <>
+                <button
+                  onClick={() =>
+                    setApptIndex((prev) =>
+                      prev === 0 ? apptImages.length - 1 : prev - 1
+                    )
+                  }
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-70 text-black p-2 rounded-full hover:bg-opacity-100 transition"
+                >
+                  ◀
+                </button>
+                <button
+                  onClick={() =>
+                    setApptIndex((prev) => (prev + 1) % apptImages.length)
+                  }
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-70 text-black p-2 rounded-full hover:bg-opacity-100 transition"
+                >
+                  ▶
+                </button>
+              </>
+            )}
+          </div>
+        </section>
       </main>
     </div>
   );

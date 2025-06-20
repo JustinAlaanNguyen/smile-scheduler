@@ -21,6 +21,7 @@ export default function LoginPage() {
   }, [searchParams]);
 
   const handleLogin = async () => {
+    setError(""); // Clear any previous error
     const res = await signIn("credentials", {
       email,
       password,
@@ -28,13 +29,17 @@ export default function LoginPage() {
     });
 
     if (res?.error === "Please verify your email before logging in.") {
-      alert("⚠️ Please verify your email before logging in.");
+      setError(
+        "⚠️ Please verify your email before logging in. Check your inbox for a verification email."
+      );
     } else if (res?.ok) {
       router.push("/dashboard");
     } else {
-      alert("❌ Login failed. Check your credentials.");
+      setError("❌ Login failed. Please check your email and password.");
     }
   };
+
+  const [error, setError] = useState("");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#9BC5D4] px-4">
@@ -44,6 +49,12 @@ export default function LoginPage() {
         {showMessage && (
           <div className="w-full bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-sm">
             ✅ Account created successfully. Please log in.
+          </div>
+        )}
+
+        {error && (
+          <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">
+            {error}
           </div>
         )}
 

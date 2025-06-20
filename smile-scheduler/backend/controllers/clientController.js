@@ -9,23 +9,28 @@ exports.createClient = async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const created_at = new Date();
-  const query = 'INSERT INTO clients (first_name, last_name, email, phone, created_at, user_id, notes) VALUES (?, ?, ?, ?, ?, ?, ?)';
-
   try {
+    const query = `
+      INSERT INTO clients (first_name, last_name, email, phone, created_at, user_id, notes)
+      VALUES (?, ?, ?, ?, NOW(), ?, ?)
+    `;
     const [result] = await db.query(query, [
       first_name,
       last_name,
       email,
       phone,
-      created_at,
       user_id,
-      notes || null,
+      notes,
     ]);
-    res.status(201).json({ message: 'Client added successfully', clientId: result.insertId });
-  } catch (error) {
-    console.error('Error creating client:', error);
-    res.status(500).json({ error: 'Database error' });
+
+    res.status(201).json({ message: "Client added successfully", clientId: result.insertId });
+  } catch (err) {
+    if (err.code === "ER_DUP_ENTRY") {
+      res.status(409).json({ error: "A client with this email already exists." });
+    } else {
+      console.error("Database error:", err);
+      res.status(500).json({ error: "Failed to add client." });
+    }
   }
 };
 
