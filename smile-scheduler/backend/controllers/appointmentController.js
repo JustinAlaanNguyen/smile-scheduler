@@ -166,7 +166,7 @@ exports.getAppointmentsByDate = async (req, res) => {
          c.first_name, c.last_name
        FROM appointments a
        JOIN clients c ON c.id = a.client_id
-       WHERE a.user_id = ? AND a.appointment_date = ?`,
+       WHERE a.user_id = ? AND DATE(a.appointment_date) = ?`,
       [userId, date]
     );
 

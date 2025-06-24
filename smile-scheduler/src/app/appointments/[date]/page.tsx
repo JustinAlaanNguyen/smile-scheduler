@@ -78,9 +78,14 @@ const DayAppointments = () => {
       "YYYY-MM-DD HH:mm:ss"
     );
     const end = moment(`${date} ${app.appointment_end}`, "YYYY-MM-DD HH:mm:ss");
+
+    const startHour = start.hour();
+    let endHour = end.hour();
+    if (endHour === startHour) endHour += 1; // ⬅️ add this line
+
     return {
-      startHour: start.hour(),
-      endHour: end.hour(),
+      startHour,
+      endHour,
       appointment: app,
       color: colorPalette[index % colorPalette.length],
     };
