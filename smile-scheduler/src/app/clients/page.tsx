@@ -38,7 +38,7 @@ export default function ClientsPage() {
 
       try {
         const res = await fetch(
-          `http://127.0.0.1:3001/api/users/id/${encodeURIComponent(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/id/${encodeURIComponent(
             session.user.email
           )}`
         );
@@ -62,10 +62,10 @@ export default function ClientsPage() {
 
       try {
         const url = debouncedQuery
-          ? `http://127.0.0.1:3001/api/clients/user/${userId}/search?query=${encodeURIComponent(
+          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/user/${encodeURIComponent(userId)}/search?query=${encodeURIComponent(
               debouncedQuery
             )}`
-          : `http://127.0.0.1:3001/api/clients/user/${userId}`;
+          : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/user/${encodeURIComponent(userId)}`;
 
         const res = await fetch(url);
         if (!res.ok) throw new Error("Failed to fetch clients");

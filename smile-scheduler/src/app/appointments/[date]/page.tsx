@@ -63,6 +63,7 @@ const DayAppointments = () => {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/user/${encodeURIComponent(userId)}/date/${encodeURIComponent(date)}`
       );
       const data: Appointment[] = await resDay.json();
+      console.log("appointments:", data);
       setAppointments(data);
       setLoading(false);
     };
