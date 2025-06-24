@@ -117,9 +117,10 @@ exports.getUserByEmail = async (req, res) => {
 
   try {
     const [results] = await db.query(
-      'SELECT id, username, email, role, created_at FROM users WHERE email = ?',
-      [email]
-    );
+  'SELECT id, username, email, role, created_at, email_notifications_enabled FROM users WHERE email = ?',
+  [email]
+);
+
 
     if (results.length === 0) {
       return res.status(404).json({ error: 'User not found' });

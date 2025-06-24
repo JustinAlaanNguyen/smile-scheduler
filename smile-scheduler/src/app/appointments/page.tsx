@@ -81,19 +81,24 @@ const MyAppointments = () => {
 
         const counts: Record<string, number> = data.reduce(
           (acc, curr) => {
-            const dateStr = moment(curr.appointment_date).format("YYYY-MM-DD");
+            const dateStr = moment(curr.appointment_date, "YYYY-MM-DD").format(
+              "YYYY-MM-DD"
+            );
             acc[dateStr] = (acc[dateStr] || 0) + 1;
             return acc;
           },
           {} as Record<string, number>
         );
 
-        const events = Object.entries(counts).map(([date, count]) => ({
-          title: `${count} appointment${count > 1 ? "s" : ""}`,
-          start: moment(date).startOf("day").toDate(),
-          end: moment(date).endOf("day").toDate(),
-          allDay: true,
-        }));
+        const events = Object.entries(counts).map(([date, count]) => {
+          const m = moment(date, "YYYY-MM-DD"); // interpret as local, not UTC
+          return {
+            title: `${count} appointment${count > 1 ? "s" : ""}`,
+            start: m.startOf("day").toDate(),
+            end: m.endOf("day").toDate(),
+            allDay: true,
+          };
+        });
 
         setEvents(events);
       } catch (err: unknown) {
