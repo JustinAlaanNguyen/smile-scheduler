@@ -51,7 +51,7 @@ export default function CreateAccountPage() {
 
     try {
       await axios.post(
-        "${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/register",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/register`,
         {
           username,
           email,

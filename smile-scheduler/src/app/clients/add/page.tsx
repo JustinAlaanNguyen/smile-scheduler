@@ -50,7 +50,7 @@ export default function AddClientPage() {
 
     try {
       const res = await fetch(
-        "${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/add",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/add`,
         {
           method: "POST",
           headers: {
