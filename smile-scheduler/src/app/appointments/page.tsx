@@ -44,7 +44,7 @@ const MyAppointments = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:3001/api/users/id/${encodeURIComponent(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/id/${encodeURIComponent(
             session.user.email
           )}`
         );
@@ -73,17 +73,20 @@ const MyAppointments = () => {
         const endStr = moment(end).format("YYYY-MM-DD");
 
         const res = await fetch(
-          `http://localhost:3001/api/appointments/user/${userId}/range?start=${startStr}&end=${endStr}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/user/${encodeURIComponent(userId)}/range?start=${encodeURIComponent(startStr)}&end=${encodeURIComponent(endStr)}`
         );
         if (!res.ok) throw new Error("Failed to fetch appointments");
 
         const data: Appointment[] = await res.json();
 
-        const counts: Record<string, number> = data.reduce((acc, curr) => {
-          const dateStr = moment(curr.appointment_date).format("YYYY-MM-DD");
-          acc[dateStr] = (acc[dateStr] || 0) + 1;
-          return acc;
-        }, {} as Record<string, number>);
+        const counts: Record<string, number> = data.reduce(
+          (acc, curr) => {
+            const dateStr = moment(curr.appointment_date).format("YYYY-MM-DD");
+            acc[dateStr] = (acc[dateStr] || 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>
+        );
 
         const events = Object.entries(counts).map(([date, count]) => ({
           title: `${count} appointment${count > 1 ? "s" : ""}`,

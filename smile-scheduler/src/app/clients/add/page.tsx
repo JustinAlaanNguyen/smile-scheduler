@@ -23,7 +23,7 @@ export default function AddClientPage() {
       const session = await res.json();
       if (session?.user?.email) {
         const userRes = await fetch(
-          `http://localhost:3001/api/users/id/${session.user.email}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/id/${encodeURIComponent(session.user.email)}`
         );
         const userData = await userRes.json();
         setUserId(userData.id);
@@ -49,20 +49,23 @@ export default function AddClientPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:3001/api/clients/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
-          email,
-          phone,
-          notes,
-          user_id: userId,
-        }),
-      });
+      const res = await fetch(
+        "${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/add",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            email,
+            phone,
+            notes,
+            user_id: userId,
+          }),
+        }
+      );
 
       if (res.ok) {
         const data = await res.json();

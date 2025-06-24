@@ -54,11 +54,13 @@ const DayAppointments = () => {
       const email = session?.user?.email;
       if (!email || !date) return;
 
-      const resId = await fetch(`http://localhost:3001/api/users/id/${email}`);
+      const resId = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/id/${encodeURIComponent(email)}`
+      );
       const { id: userId } = await resId.json();
 
       const resDay = await fetch(
-        `http://localhost:3001/api/appointments/user/${userId}/date/${date}`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/user/${encodeURIComponent(userId)}/date/${encodeURIComponent(date)}`
       );
       const data: Appointment[] = await resDay.json();
       setAppointments(data);
@@ -116,10 +118,10 @@ const DayAppointments = () => {
                   ? isStart && isEnd
                     ? "rounded-lg"
                     : isStart
-                    ? "rounded-t-lg"
-                    : isEnd
-                    ? "rounded-b-lg"
-                    : ""
+                      ? "rounded-t-lg"
+                      : isEnd
+                        ? "rounded-b-lg"
+                        : ""
                   : "rounded-lg";
 
                 return (

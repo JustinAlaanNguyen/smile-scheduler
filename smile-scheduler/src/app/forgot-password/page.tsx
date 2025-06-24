@@ -7,11 +7,14 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
 
   const handleResetRequest = async () => {
-    const res = await fetch("http://localhost:3001/api/users/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/forgot-password`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+    );
 
     const data = await res.json();
     setMessage(data.message || data.error);

@@ -11,11 +11,14 @@ export default function ResetPasswordPage() {
   const token = searchParams?.get("token");
 
   const handleReset = async () => {
-    const res = await fetch("http://localhost:3001/api/users/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, password }),
-    });
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/reset-password`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password }),
+      }
+    );
 
     const data = await res.json();
     if (res.ok) {

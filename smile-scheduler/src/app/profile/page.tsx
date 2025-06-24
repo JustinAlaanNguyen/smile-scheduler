@@ -34,7 +34,7 @@ export default function MyProfilePage() {
     const fetchUser = async () => {
       if (!session?.user?.email) return;
       const res = await fetch(
-        `http://localhost:3001/api/users/by-email/${encodeURIComponent(session.user.email)}`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/by-email/${encodeURIComponent(session.user.email)}`
       );
       const data = await res.json();
       setUser(data);
@@ -50,7 +50,7 @@ export default function MyProfilePage() {
   const handleToggleNotifications = async () => {
     if (!user) return;
     const res = await fetch(
-      `http://localhost:3001/api/users/toggle-notifications/${user.id}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/toggle-notifications/${encodeURIComponent(user.id)}`,
       { method: "PUT" }
     );
 
@@ -71,7 +71,7 @@ export default function MyProfilePage() {
     if (!confirmed) return;
 
     const res = await fetch(
-      `http://localhost:3001/api/users/update/${user.id}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/update/${user.id}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -97,7 +97,7 @@ export default function MyProfilePage() {
     if (!confirmed) return;
 
     const res = await fetch(
-      `http://localhost:3001/api/users/delete/${user.id}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/delete/${encodeURIComponent(user.id)}`,
       {
         method: "DELETE",
       }

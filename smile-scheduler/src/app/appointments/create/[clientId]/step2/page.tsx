@@ -27,7 +27,9 @@ export default function AppointmentStep2() {
 
   const fetchUserId = async (email: string): Promise<number | null> => {
     try {
-      const res = await fetch(`http://localhost:3001/api/users/id/${email}`);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/id/${encodeURIComponent(email)}`
+      );
       if (!res.ok) throw new Error("Failed to fetch user id");
       const data = await res.json();
       return data.id;
@@ -49,7 +51,7 @@ export default function AppointmentStep2() {
 
       try {
         const res = await fetch(
-          `http://localhost:3001/api/appointments/user/${userId}/date/${formattedDate}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/user/${encodeURIComponent(userId)}/date/${encodeURIComponent(formattedDate)}`
         );
         const data = await res.json();
         console.log("Fetched appointments:", data);
@@ -81,7 +83,7 @@ export default function AppointmentStep2() {
 
       try {
         const res = await fetch(
-          `http://localhost:3001/api/clients/client/${clientId}?email=${email}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/client/${encodeURIComponent(clientId)}?email=${encodeURIComponent(email)}`
         );
         if (!res.ok) {
           console.error("Failed to fetch client details", res.status);
@@ -127,11 +129,14 @@ export default function AppointmentStep2() {
     };
 
     try {
-      const res = await fetch("http://localhost:3001/api/appointments/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(appointmentData),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/create`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(appointmentData),
+        }
+      );
 
       const result = await res.json();
 
@@ -274,8 +279,8 @@ export default function AppointmentStep2() {
                     isInRange
                       ? "bg-[#327b8c] text-white"
                       : isBooked
-                      ? "bg-red-300 text-white" // You can use a different color
-                      : "hover:bg-gray-100 text-[#4e6472]"
+                        ? "bg-red-300 text-white" // You can use a different color
+                        : "hover:bg-gray-100 text-[#4e6472]"
                   }`}
                 >
                   <span>{slot}</span>

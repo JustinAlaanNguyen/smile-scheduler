@@ -34,8 +34,12 @@ export default async function ClientDetailsPage({ params }: PageProps) {
   let client: Client | null = null;
 
   try {
+    if (!session.user?.email) {
+      throw new Error("User email is not available.");
+    }
+
     const res = await fetch(
-      `http://localhost:3001/api/clients/client/${clientId}?email=${session.user?.email}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/client/${encodeURIComponent(clientId)}?email=${encodeURIComponent(session.user.email)}`,
       { cache: "no-store" }
     );
 

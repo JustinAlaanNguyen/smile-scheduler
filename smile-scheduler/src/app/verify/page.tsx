@@ -20,7 +20,7 @@ export default function VerifyPage() {
     const verifyEmail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/api/users/verify?token=${token}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/verify?token=${encodeURIComponent(token)}`
         );
         const data = await response.json();
 

@@ -53,7 +53,7 @@ export default function EditAppointmentPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/appointments/${appointmentId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/${encodeURIComponent(appointmentId)}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -81,7 +81,7 @@ export default function EditAppointmentPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/appointments/${appointmentId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/${encodeURIComponent(appointmentId)}`,
         {
           method: "DELETE",
         }
@@ -103,7 +103,7 @@ export default function EditAppointmentPage() {
     const fetchAppointment = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3001/api/appointments/${appointmentId}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/${encodeURIComponent(appointmentId)}`
         );
         const data = await res.json();
 

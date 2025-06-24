@@ -26,7 +26,7 @@ export default function ClientDetails({ client }: { client: Client }) {
 
   const handleSave = async () => {
     const res = await fetch(
-      `http://localhost:3001/api/clients/client/${client.id}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/client/${encodeURIComponent(client.id)}`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -45,7 +45,7 @@ export default function ClientDetails({ client }: { client: Client }) {
     if (!confirm("Are you sure you want to delete this client?")) return;
 
     const res = await fetch(
-      `http://localhost:3001/api/clients/client/${client.id}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/client/${encodeURIComponent(client.id)}`,
       {
         method: "DELETE",
       }

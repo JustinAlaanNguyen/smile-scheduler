@@ -50,11 +50,14 @@ export default function CreateAccountPage() {
     setLoading(true);
 
     try {
-      await axios.post("http://localhost:3001/api/users/register", {
-        username,
-        email,
-        password,
-      });
+      await axios.post(
+        "${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/register",
+        {
+          username,
+          email,
+          password,
+        }
+      );
 
       router.push("/login?justRegistered=true");
     } catch (err: unknown) {
