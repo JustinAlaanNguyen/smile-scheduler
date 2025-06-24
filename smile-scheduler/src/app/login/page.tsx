@@ -21,7 +21,7 @@ export default function LoginPage() {
   }, [searchParams]);
 
   const handleLogin = async () => {
-    setError(""); // Clear any previous error
+    //setError(""); // Clear any previous error
     const res = await signIn("credentials", {
       email,
       password,
