@@ -198,3 +198,54 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
+exports.requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+  const token = uuidv4();
+  const tokenExpires = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+  try {
+    const [users] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
+    if (users.length === 0) return res.status(404).json({ error: "Email not found." });
+
+    await db.query(
+      "UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE email = ?",
+      [token, tokenExpires, email]
+    );
+
+    const link = `http://localhost:3000/reset-password?token=${token}`;
+    await sendEmail({
+      to: email,
+      subject: "Reset your password",
+      html: `<p>Click below to reset your password:</p><a href="${link}">Reset Password</a>`,
+    });
+
+    res.json({ message: "Reset link sent to your email." });
+  } catch (err) {
+    console.error("Reset request error:", err);
+    res.status(500).json({ error: "Something went wrong." });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+
+  try {
+    const [users] = await db.query(
+      "SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > NOW()",
+      [token]
+    );
+
+    if (users.length === 0) return res.status(400).json({ error: "Invalid or expired token." });
+
+    const hashed = await bcrypt.hash(password, 10);
+    await db.query(
+      "UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?",
+      [hashed, users[0].id]
+    );
+
+    res.json({ message: "Password reset successfully." });
+  } catch (err) {
+    console.error("Password reset error:", err);
+    res.status(500).json({ error: "Reset failed." });
+  }
+};

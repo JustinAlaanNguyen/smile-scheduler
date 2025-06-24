@@ -24,4 +24,8 @@ router.put('/toggle-notifications/:userId', userController.toggleNotifications);
 // Email verification
 router.get('/verify', userController.verifyEmail);
 
+router.post("/forgot-password", userController.requestPasswordReset);
+router.post("/reset-password", userController.resetPassword);
+
+
 module.exports = router;

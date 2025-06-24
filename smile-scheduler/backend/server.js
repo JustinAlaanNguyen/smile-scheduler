@@ -15,7 +15,10 @@ const cors = require('cors');
 const app = express();
 const port = 3001;
 
-app.use(cors());
+app.use(cors({
+  origin: '*', //  "*" for testing,  https://your-frontend-domain.com
+  credentials: true,
+}));
 app.use(express.json());
 
 // Basic test route
