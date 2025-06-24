@@ -1,4 +1,3 @@
-//server.js
 require('dotenv').config();
 
 process.on('uncaughtException', (err) => {
@@ -13,10 +12,10 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: '*', //  "*" for testing,  https://your-frontend-domain.com
+  origin: process.env.CLIENT_URL || '*',
   credentials: true,
 }));
 app.use(express.json());
@@ -36,5 +35,5 @@ app.use('/api/clients', clientRoutes);
 app.use("/api/appointments", appointmentRoutes);
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`✅ Server is running on http://localhost:${port}`);
 });

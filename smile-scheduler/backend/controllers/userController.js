@@ -1,5 +1,5 @@
 //backend/controllers/userController.js
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const db = require('../db');
 const sendEmail = require('../utils/email');
 const { v4: uuidv4 } = require('uuid');
