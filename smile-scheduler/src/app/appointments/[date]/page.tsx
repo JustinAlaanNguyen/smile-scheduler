@@ -59,14 +59,22 @@ const DayAppointments = () => {
       );
       const { id: userId } = await resId.json();
 
-      const resDay = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/user/${encodeURIComponent(userId)}/date/${encodeURIComponent(date)}`
-      );
+      // ▸▸ 1) log exact URL we’re about to hit
+      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/user/${encodeURIComponent(
+        userId
+      )}/date/${encodeURIComponent(date)}`;
+      console.log("[DayAppointments] GET →", url);
+
+      const resDay = await fetch(url);
+
+      // ▸▸ 2) log what we got back
       const data: Appointment[] = await resDay.json();
-      console.log("appointments:", data);
+      console.log("[DayAppointments] data ←", data);
+
       setAppointments(data);
       setLoading(false);
     };
+
     fetchAppointments();
   }, [date]);
 

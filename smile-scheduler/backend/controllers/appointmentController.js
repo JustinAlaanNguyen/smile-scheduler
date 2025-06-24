@@ -151,8 +151,12 @@ exports.getAppointmentsInRangeByUserId = async (req, res) => {
 };
 
 // GET Appointments by Date
+// GET Appointments by Date
 exports.getAppointmentsByDate = async (req, res) => {
   const { userId, date } = req.params;
+
+  // ───► 1) what did the client send?
+  console.log("[getAppointmentsByDate] params:", { userId, date });
 
   try {
     const [appointments] = await db.query(
@@ -170,12 +174,16 @@ exports.getAppointmentsByDate = async (req, res) => {
       [userId, date]
     );
 
+    // ───► 2) what came back from MySQL?
+    console.log("[getAppointmentsByDate] rows:", appointments);
+
     res.json(appointments);
   } catch (error) {
-    console.error("Error fetching appointments for date:", error);
+    console.error("[getAppointmentsByDate] SQL error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 // GET Single Appointment
 exports.getAppointmentById = async (req, res) => {
