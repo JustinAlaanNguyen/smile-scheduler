@@ -39,6 +39,7 @@ exports.createUser = async (req, res) => {
 
 
 // Update account
+// backend/controllers/userController.js
 exports.updateUser = async (req, res) => {
   const { username, email, password } = req.body;
   const id = req.params.id;
@@ -51,31 +52,24 @@ exports.updateUser = async (req, res) => {
 
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
-      sql = 'UPDATE users SET username=?, email=?, password=? WHERE id=?';
+      sql = 'UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?';
       params = [username, email, hashedPassword, id];
     } else {
-      sql = 'UPDATE users SET username=?, email=? WHERE id=?';
+      sql = 'UPDATE users SET username = ?, email = ? WHERE id = ?';
       params = [username, email, id];
     }
 
-    await new Promise((resolve, reject) => {
-      db.query(sql, params, (err, result) => {
-        if (err) {
-          console.error('Update DB error:', err);
-          return reject(err); // error is now caught by outer try/catch
-        }
-        resolve(result);
-      });
-    });
+    // ✅ use the promise API (no callback)
+    await db.query(sql, params);
 
     console.log("✅ Update successful");
-    return res.status(200).json({ message: 'User updated successfully' });
-
+    return res.status(200).json({ message: "User updated successfully" });
   } catch (error) {
-    console.error('❌ Update error caught in backend:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("❌ Update error:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 
 // Delete account and all related appointments/clients// Delete account and related data
