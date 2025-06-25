@@ -59,13 +59,12 @@ exports.updateUser = async (req, res) => {
     }
 
     await new Promise((resolve, reject) => {
-      db.query(sql, params, (err) => {
+      db.query(sql, params, (err, result) => {
         if (err) {
           console.error('Update DB error:', err);
-          return reject(err);
-        } else {
-          return resolve();
+          return reject(err); // error is now caught by outer try/catch
         }
+        resolve(result);
       });
     });
 
@@ -73,7 +72,7 @@ exports.updateUser = async (req, res) => {
     return res.status(200).json({ message: 'User updated successfully' });
 
   } catch (error) {
-    console.error('Update error:', error);
+    console.error('❌ Update error caught in backend:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
