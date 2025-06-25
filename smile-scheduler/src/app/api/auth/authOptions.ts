@@ -24,6 +24,16 @@ export const authOptions: NextAuthOptions = {
         }
 
         const isValid = await compare(credentials.password, user.password);
+
+         // ─── DEBUG LOG ─────────────────────────────────────
+  if (process.env.DEBUG_AUTH === "true") {
+    console.log(
+      `[LOGIN] email=${credentials.email}  match=${isValid}  ` +
+      `hash_in_db=${user.password.slice(0, 10)}…`
+    );
+  }
+  // ──────────────────────────────────────────────────
+
         if (!isValid) throw new Error("Invalid password");
 
         return { id: String(user.id), email: user.email, name: user.username };

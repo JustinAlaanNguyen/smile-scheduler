@@ -51,12 +51,27 @@ exports.updateUser = async (req, res) => {
     let sql, params;
 
     if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      sql = 'UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?';
-      params = [username, email, hashedPassword, id];
-    } else {
+  const old = await db.query(
+    "SELECT password FROM users WHERE id = ?", [id]
+  );
+  const oldHash = old[0][0].password;
+
+  const newHash = await bcrypt.hash(password, 10);
+  sql   = "UPDATE users SET username=?, email=?, password=? WHERE id=?";
+  params = [username, email, newHash, id];
+
+  if (process.env.DEBUG_AUTH === "true") {
+    console.log(
+      `[PWD-CHANGE] user=${id} email=${email} ` +
+      `oldHashStart=${oldHash.slice(0,10)}… newHashStart=${newHash.slice(0,10)}…`
+    );
+  }
+}
+else {
       sql = 'UPDATE users SET username = ?, email = ? WHERE id = ?';
       params = [username, email, id];
+
+      
     }
 
     // ✅ use the promise API (no callback)
@@ -246,6 +261,15 @@ exports.resetPassword = async (req, res) => {
       "UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?",
       [hashed, users[0].id]
     );
+
+       // ─────── DEBUG ───────
+    if (process.env.DEBUG_AUTH === "true") {
+      console.log(
+        `[PWD-RESET] user=${user.id} email=${user.email} ` +
+        `oldHashStart=${oldHash.slice(0,10)}…  newHashStart=${newHash.slice(0,10)}…`
+      );
+    }
+    // ─────────────────────
 
     res.json({ message: "Password reset successfully." });
   } catch (err) {
