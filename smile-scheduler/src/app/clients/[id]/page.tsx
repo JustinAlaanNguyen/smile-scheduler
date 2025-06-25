@@ -13,13 +13,11 @@ interface Client {
   notes?: string;
 }
 
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function ClientDetailsPage({ params }: PageProps) {
+export default async function ClientDetailsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
