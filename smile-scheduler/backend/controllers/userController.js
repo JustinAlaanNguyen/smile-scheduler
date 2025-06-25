@@ -40,6 +40,8 @@ exports.createUser = async (req, res) => {
 
 // Update account
 exports.updateUser = async (req, res) => {
+  console.log("➡️ Received update request for user:", req.params.id);
+  console.log("Request body:", req.body);
   const { username, email, password } = req.body;
   const id = req.params.id;
 
@@ -55,23 +57,21 @@ exports.updateUser = async (req, res) => {
       params = [username, email, id];
     }
 
-    await new Promise((resolve, reject) => {
-      db.query(sql, params, (err) => {
-        if (err) {
-          console.error('Update DB error:', err);
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+    db.query(sql, params, (err, results) => {
+      if (err) {
+        console.error('❌ Update DB error:', err);
+        return res.status(500).json({ error: 'Database update failed.' });
+      }
 
-    res.json({ message: 'User updated successfully' });
+      console.log('✅ User updated in DB');
+      res.json({ message: 'User updated successfully' });
+    });
   } catch (error) {
-    console.error('Update error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('❌ Update error (outer catch):', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 
 
