@@ -1,9 +1,10 @@
 "use client";
 
+import React, { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function VerifyPage() {
+function VerifyPageInner() {
   const [status, setStatus] = useState("Verifying...");
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -44,5 +45,13 @@ export default function VerifyPage() {
       <h1 className="text-2xl font-bold mb-4">Email Verification</h1>
       <p>{status}</p>
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div>Loading verification...</div>}>
+      <VerifyPageInner />
+    </Suspense>
   );
 }
