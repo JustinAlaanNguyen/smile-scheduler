@@ -27,5 +27,6 @@ router.get('/verify', userController.verifyEmail);
 router.post("/forgot-password", userController.requestPasswordReset);
 router.post("/reset-password", userController.resetPassword);
 
+router.get('/:id', userController.getUserById);
 
 module.exports = router;

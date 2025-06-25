@@ -1,23 +1,21 @@
-//profile/page
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { motion, AnimatePresence } from "framer-motion";
 
-type User = {
+interface User {
   id: number;
   username: string;
   email: string;
   role: string;
   created_at: string;
-};
+  email_notifications_enabled: boolean;
+}
 
 export default function MyProfilePage() {
   const { data: session } = useSession();
-  const router = useRouter();
 
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState("");
@@ -25,221 +23,268 @@ export default function MyProfilePage() {
   const [password, setPassword] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
 
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-
-  // Fetch notification state
   useEffect(() => {
-    const fetchUser = async () => {
-      if (!session?.user?.email) return;
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/by-email/${encodeURIComponent(session.user.email)}`
-      );
-      const data = await res.json();
-      setUser(data);
-      setUsername(data.username);
-      setEmail(data.email);
-      setNotificationsEnabled(data.email_notifications_enabled); // 👈
-    };
+    if (!session?.user?.email) return;
 
-    fetchUser();
+    fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/by-email/${encodeURIComponent(
+        session.user.email
+      )}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setUser(data);
+        setUsername(data.username);
+        setEmail(data.email);
+        setNotificationsEnabled(data.email_notifications_enabled);
+      });
   }, [session]);
 
-  // Toggle handler
   const handleToggleNotifications = async () => {
     if (!user) return;
+
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/toggle-notifications/${encodeURIComponent(user.id)}`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/toggle-notifications/${user.id}`,
       { method: "PUT" }
     );
 
     if (res.ok) {
       const data = await res.json();
       setNotificationsEnabled(data.email_notifications_enabled);
-    } else {
-      alert("❌ Failed to toggle notifications");
     }
   };
 
   const handleUpdate = async () => {
     if (!user) return;
 
-    const confirmed = window.confirm(
-      "Are you sure you want to update your profile?"
-    );
-    if (!confirmed) return;
+    setLoading(true);
 
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/update/${user.id}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
-      }
-    );
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/update/${user.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password }),
+        }
+      );
 
-    if (res.ok) {
-      setConfirmationMessage("✅ Profile updated successfully.");
-      setEditMode(false);
+      if (!res.ok) throw new Error(await res.text());
+
+      const refreshed = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}`
+      );
+      const updatedUser = await refreshed.json();
+
+      setUser(updatedUser);
+      setUsername(updatedUser.username);
+      setEmail(updatedUser.email);
+      setNotificationsEnabled(updatedUser.email_notifications_enabled);
+
       setPassword("");
-    } else {
-      alert("❌ Failed to update profile");
+      setEditMode(false);
+      setConfirmationMessage("✅ Profile updated successfully.");
+
+      setTimeout(() => setConfirmationMessage(""), 3000);
+    } catch (err) {
+      alert("Failed to update profile: " + err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!user) return;
-
-    const confirmed = window.confirm(
-      "Are you sure you want to delete your profile? This will delete all related appointments and clients!"
-    );
-    if (!confirmed) return;
+    if (!window.confirm("Delete your account permanently?")) return;
 
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/delete/${encodeURIComponent(user.id)}`,
-      {
-        method: "DELETE",
-      }
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/delete/${user.id}`,
+      { method: "DELETE" }
     );
 
     if (res.ok) {
-      alert("✅ Account deleted. Logging you out...");
-      router.push("/api/auth/signout");
+      alert("Account deleted. Logging out...");
+      signOut({ callbackUrl: "/" });
     } else {
-      alert("❌ Failed to delete account");
+      alert("Failed to delete account.");
     }
   };
 
-  if (!user) return <p className="p-6">Loading profile...</p>;
+  const resetForm = () => {
+    if (!user) return;
+    setUsername(user.username);
+    setEmail(user.email);
+    setPassword("");
+    setEditMode(false);
+    setConfirmationMessage("");
+  };
+
+  if (!user) return <div className="p-8">Loading profile...</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
+    <div className="min-h-screen bg-gradient-to-br from-sky-100 via-white to-indigo-100">
       <Navbar />
-      <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow text-[#4e6472]">
-        <h1 className="text-2xl font-bold mb-4">My Profile</h1>
+      <main className="max-w-3xl mx-auto mt-12 p-8 bg-white rounded-3xl shadow-2xl">
+        <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">
+          My Profile
+        </h1>
 
-        {confirmationMessage && (
-          <div className="mb-4 p-2 bg-green-100 border border-green-400 text-green-700 rounded">
-            {confirmationMessage}
-          </div>
-        )}
+        <AnimatePresence>
+          {confirmationMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-4 p-3 rounded bg-green-100 border border-green-400 text-green-800"
+            >
+              {confirmationMessage}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <p className="mb-4 text-sm text-gray-600">
-          Account created on: {new Date(user.created_at).toLocaleDateString()}
+        <p className="text-sm text-center text-gray-500 mb-6">
+          Created: {new Date(user.created_at).toLocaleDateString()}
         </p>
 
-        <div className="space-y-4">
-          <label className="block">
-            <span className="font-medium">Username</span>
-            <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded mt-1"
-              value={username}
-              readOnly={!editMode}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </label>
-
-          <label className="block">
-            <span className="font-medium">Email</span>
-            <input
-              type="email"
-              className="w-full p-2 border border-gray-300 rounded mt-1"
-              value={email}
-              readOnly={!editMode}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </label>
-
+        <div className="space-y-5 text-black">
+          <InputField
+            label="Username"
+            value={username}
+            readOnly={!editMode}
+            onChange={setUsername}
+          />
+          <InputField
+            label="Email"
+            value={email}
+            readOnly={!editMode}
+            onChange={setEmail}
+          />
           {editMode && (
-            <label className="block">
-              <span className="font-medium">New Password</span>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className="w-full p-2 border border-gray-300 rounded mt-1"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Leave blank to keep current password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute top-1/2 right-2 transform -translate-y-1/2 text-sm text-gray-500"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-            </label>
+            <InputField
+              label="New Password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={setPassword}
+              placeholder="Leave blank to keep current password"
+              rightAction={() => setShowPassword(!showPassword)}
+              rightText={showPassword ? "Hide" : "Show"}
+            />
           )}
-
           <p className="text-sm text-gray-600">
             Role: <strong>{user.role}</strong>
           </p>
-          <div className="mt-6 text-center">
-            <p className="mb-2">
-              Email Notifications:{" "}
+
+          <div className="text-center">
+            <p className="mb-2 text-black">
+              Notifications:{" "}
               <strong>
                 {notificationsEnabled ? "Enabled ✅" : "Disabled ❌"}
               </strong>
             </p>
             <button
               onClick={handleToggleNotifications}
-              className="bg-[#327b8c] text-white px-6 py-2 rounded hover:bg-[#285f6e]"
+              className="transition bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded shadow"
             >
-              {notificationsEnabled
-                ? "Disable Notifications"
-                : "Enable Notifications"}
+              {notificationsEnabled ? "Disable" : "Enable"} Notifications
             </button>
           </div>
 
           {!editMode ? (
             <button
               onClick={() => setEditMode(true)}
-              className="mt-4 bg-[#327b8c] text-white px-6 py-2 rounded hover:bg-[#285f6e]"
+              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
             >
               Edit Profile
             </button>
           ) : (
-            <div className="flex flex-col gap-3 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 onClick={handleUpdate}
-                className="bg-[#327b8c] text-white px-6 py-2 rounded hover:bg-[#285f6e]"
+                disabled={loading}
+                className={`${
+                  loading ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
+                } text-white py-2 rounded`}
               >
-                Save Changes
+                {loading ? "Saving..." : "Save"}
               </button>
-
+              <button
+                onClick={resetForm}
+                disabled={loading}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 rounded"
+              >
+                Cancel
+              </button>
               <button
                 onClick={handleDelete}
-                className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600"
+                disabled={loading}
+                className="bg-red-500 hover:bg-red-600 text-white py-2 rounded"
               >
-                Delete Profile
-              </button>
-
-              <button
-                onClick={() => {
-                  setEditMode(false);
-                  setPassword("");
-                  setConfirmationMessage("");
-                }}
-                className="text-sm text-gray-500 underline"
-              >
-                Cancel Editing
+                Delete
               </button>
             </div>
           )}
         </div>
-      </div>
 
-      <div className="max-w-xl mx-auto mt-6 text-center">
-        <button
-          onClick={() => signOut({ callbackUrl: "/" })}
-          className="mt-4 bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
-        >
-          Sign Out
-        </button>
-      </div>
+        <div className="mt-10 text-center">
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded shadow"
+          >
+            Sign Out
+          </button>
+        </div>
+      </main>
     </div>
+  );
+}
+
+function InputField({
+  label,
+  value,
+  onChange,
+  readOnly = false,
+  type = "text",
+  placeholder,
+  rightAction,
+  rightText,
+}: {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  readOnly?: boolean;
+  type?: string;
+  placeholder?: string;
+  rightAction?: () => void;
+  rightText?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-gray-700 font-medium">{label}</span>
+      <div className="relative mt-1">
+        <input
+          type={type}
+          className={`w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+            readOnly ? "bg-gray-100 text-gray-500" : ""
+          }`}
+          value={value}
+          readOnly={readOnly}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+        />
+        {rightAction && (
+          <button
+            type="button"
+            onClick={rightAction}
+            className="absolute top-1/2 right-3 transform -translate-y-1/2 text-sm text-gray-500"
+          >
+            {rightText}
+          </button>
+        )}
+      </div>
+    </label>
   );
 }

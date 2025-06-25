@@ -60,7 +60,7 @@ exports.updateUser = async (req, res) => {
         console.error('Update DB error:', err);
         return res.status(500).send(err);
       }
-      res.send('User updated successfully');
+      res.json({ message: 'User updated successfully' });
     });
   } catch (error) {
     console.error('Update error:', error);
@@ -248,5 +248,25 @@ exports.resetPassword = async (req, res) => {
   } catch (err) {
     console.error("Password reset error:", err);
     res.status(500).json({ error: "Reset failed." });
+  }
+};
+
+exports.getUserById = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const [results] = await db.query(
+      'SELECT id, username, email, role, created_at, email_notifications_enabled FROM users WHERE id = ?',
+      [id]
+    );
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json(results[0]);
+  } catch (err) {
+    console.error('Database error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
