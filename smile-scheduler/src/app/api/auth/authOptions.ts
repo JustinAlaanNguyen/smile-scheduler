@@ -13,29 +13,36 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Missing email or password");
-        }
+  if (!credentials?.email || !credentials?.password) {
+    console.log("❌ Missing credentials");
+    throw new Error("Missing email or password");
+  }
 
-        const user = await getUserByEmail(credentials.email);
-        if (!user) throw new Error("No user found");
-        if (!user.email_verified) {
-          throw new Error("Please verify your email before logging in.");
-        }
+  const user = await getUserByEmail(credentials.email);
+  if (!user) {
+    console.log("❌ No user found");
+    throw new Error("No user found");
+  }
 
-        const isValid = await compare(credentials.password, user.password);
+  if (!user.email_verified) {
+    console.log("❌ Email not verified");
+    throw new Error("Please verify your email before logging in.");
+  }
 
-         // ─── DEBUG LOG ─────────────────────────────────────
- console.log(
-      `[LOGIN] email=${credentials.email}  match=${isValid}  ` +
-      `hash_in_db=${user.password.slice(0, 10)}…`
-    );
-  // ──────────────────────────────────────────────────
+  const isValid = await compare(credentials.password, user.password);
 
-        if (!isValid) throw new Error("Invalid password");
+  console.log(
+    `[LOGIN] email=${credentials.email}  match=${isValid} hash_in_db=${user.password.slice(0, 10)}…`
+  );
 
-        return { id: String(user.id), email: user.email, name: user.username };
-      },
+  if (!isValid) {
+    console.log("❌ Invalid password");
+    throw new Error("Invalid password");
+  }
+
+  return { id: String(user.id), email: user.email, name: user.username };
+}
+,
     }),
   ],
   session: { strategy: "jwt" },
