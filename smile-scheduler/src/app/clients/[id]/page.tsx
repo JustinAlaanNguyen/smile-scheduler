@@ -16,8 +16,9 @@ interface Client {
 export default async function ClientDetailsPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const clientId = (await params).id;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -28,7 +29,6 @@ export default async function ClientDetailsPage({
     );
   }
 
-  const clientId = params.id;
   let client: Client | null = null;
 
   try {
