@@ -256,21 +256,21 @@ exports.resetPassword = async (req, res) => {
 
     if (users.length === 0) return res.status(400).json({ error: "Invalid or expired token." });
 
+     console.log("🔐 Old hashed password from DB:", users[0].password);
+    console.log("🆕 New plain password from form:", password);
+
+
     const hashed = await bcrypt.hash(password, 10);
+
+    console.log("🧂 New hashed password:", hashed);
+
     await db.query(
       "UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?",
       [hashed, users[0].id]
     );
 
-       // ─────── DEBUG ───────
-    if (process.env.DEBUG_AUTH === "true") {
-      console.log(
-        `[PWD-RESET] user=${user.id} email=${user.email} ` +
-        `oldHashStart=${oldHash.slice(0,10)}…  newHashStart=${newHash.slice(0,10)}…`
-      );
-    }
-    // ─────────────────────
-
+       console.log(`✅ Password reset for user with ID ${users[0].id}`);
+       
     res.json({ message: "Password reset successfully." });
   } catch (err) {
     console.error("Password reset error:", err);
