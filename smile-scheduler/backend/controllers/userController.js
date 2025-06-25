@@ -216,7 +216,7 @@ exports.requestPasswordReset = async (req, res) => {
       [token, tokenExpires, email]
     );
 
-    const link = `h${process.env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(token)}`;
+    const link = `${process.env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(token)}`;
     await sendEmail({
       to: email,
       subject: "Reset your password",
