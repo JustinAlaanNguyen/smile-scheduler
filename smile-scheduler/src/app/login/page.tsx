@@ -1,15 +1,16 @@
 "use client";
 
+import React, { Suspense, useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
 
-export default function LoginPage() {
+function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showMessage, setShowMessage] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const justRegistered = searchParams?.get("justRegistered") === "true";
@@ -21,7 +22,6 @@ export default function LoginPage() {
   }, [searchParams]);
 
   const handleLogin = async () => {
-    //setError(""); // Clear any previous error
     const res = await signIn("credentials", {
       email,
       password,
@@ -38,8 +38,6 @@ export default function LoginPage() {
       setError("❌ Login failed. Please check your email and password.");
     }
   };
-
-  const [error, setError] = useState("");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#9BC5D4] px-4">
@@ -93,5 +91,13 @@ export default function LoginPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
