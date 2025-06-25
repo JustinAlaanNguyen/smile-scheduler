@@ -12,7 +12,7 @@ interface UserRow extends RowDataPacket {
 export async function getUserByEmail(email: string) {
   console.log('🔍 [getUserByEmail] Looking up user with email:', email);
 
-  const [rows] = await db.query<UserRow[]>("SELECT * FROM users WHERE email = ?", [email]);
+  const [rows] = await db.query<UserRow[]>("SELECT * FROM smile_scheduler_db.users WHERE email = ?", [email]);
 
   console.log('📄 [getUserByEmail] Query result:', rows);
 
