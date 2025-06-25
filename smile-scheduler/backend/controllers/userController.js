@@ -55,18 +55,24 @@ exports.updateUser = async (req, res) => {
       params = [username, email, id];
     }
 
-    db.query(sql, params, (err) => {
-      if (err) {
-        console.error('Update DB error:', err);
-        return res.status(500).send(err);
-      }
-      res.json({ message: 'User updated successfully' });
+    await new Promise((resolve, reject) => {
+      db.query(sql, params, (err) => {
+        if (err) {
+          console.error('Update DB error:', err);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
     });
+
+    res.json({ message: 'User updated successfully' });
   } catch (error) {
     console.error('Update error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 
 // Delete account and all related appointments/clients// Delete account and related data

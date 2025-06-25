@@ -62,6 +62,7 @@ export default function MyProfilePage() {
     if (!user) return;
 
     setLoading(true);
+    console.log("Starting profile update");
 
     try {
       const res = await fetch(
@@ -73,11 +74,18 @@ export default function MyProfilePage() {
         }
       );
 
+      console.log("Update response status:", res.status);
+
       if (!res.ok) throw new Error(await res.text());
+
+      console.log("Fetching updated user data");
 
       const refreshed = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}`
       );
+
+      console.log("Refreshed user response status:", refreshed.status);
+
       const updatedUser = await refreshed.json();
 
       setUser(updatedUser);
@@ -91,9 +99,11 @@ export default function MyProfilePage() {
 
       setTimeout(() => setConfirmationMessage(""), 3000);
     } catch (err) {
+      console.error("Update error caught in frontend:", err);
       alert("Failed to update profile: " + err);
     } finally {
       setLoading(false);
+      console.log("Update process ended");
     }
   };
 
