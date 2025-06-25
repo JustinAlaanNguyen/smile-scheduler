@@ -10,23 +10,31 @@ interface UserRow extends RowDataPacket {
   email_verified: boolean;
 }
 export async function getUserByEmail(email: string) {
-  console.log('🔍 [getUserByEmail] Looking up user with email:', email);
+  console.log("🔍 [getUserByEmail] Looking up user with email:", email);
 
-  const [rows] = await db.query<UserRow[]>("SELECT * FROM smile_scheduler_db.users WHERE email = ?", [email]);
+  try {
+    const [rows] = await db.query<UserRow[]>(
+      "SELECT * FROM smile_scheduler_db.users WHERE email = ?",
+      [email]
+    );
 
-  console.log('📄 [getUserByEmail] Query result:', rows);
+    console.log("📄 [getUserByEmail] Query result:", rows);
 
-  if (rows.length === 0) {
-    console.warn('⚠️ [getUserByEmail] No user found with email:', email);
-    return null;
+    if (rows.length === 0) {
+      console.warn("⚠️ [getUserByEmail] No user found with email:", email);
+      return null;
+    }
+
+    const user = rows[0];
+    return {
+      id: user.id,
+      email: user.email,
+      password: user.password,
+      username: user.username,
+      email_verified: user.email_verified,
+    };
+  } catch (error) {
+    console.error("❌ DB ERROR in getUserByEmail:", error);
+    throw new Error("Database query failed");
   }
-
-  const user = rows[0];
-  return {
-    id: user.id,
-    email: user.email,
-    password: user.password,
-    username: user.username,
-    email_verified: user.email_verified,
-  };
 }
