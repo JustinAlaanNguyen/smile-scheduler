@@ -17,7 +17,7 @@ exports.createUser = async (req, res) => {
   'INSERT INTO users (username, email, password, email_verified, verification_token, verification_token_expires) VALUES (?, ?, ?, ?, ?, ?)',
   [username, email, hashedPassword, false, verificationToken, tokenExpires]
 );
-    const verificationLink = `http://localhost:3000/verify?token=${verificationToken}`;
+    const verificationLink = `${process.env.FRONTEND_URL}/verify?token=${encodeURIComponent(verificationToken)}`;
 
     await sendEmail({
       to: email,
@@ -216,7 +216,7 @@ exports.requestPasswordReset = async (req, res) => {
       [token, tokenExpires, email]
     );
 
-    const link = `http://localhost:3000/reset-password?token=${token}`;
+    const link = `h${process.env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(token)}`;
     await sendEmail({
       to: email,
       subject: "Reset your password",
