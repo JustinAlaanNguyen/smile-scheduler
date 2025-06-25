@@ -74,17 +74,22 @@ export default function MyProfilePage() {
         }
       );
 
-      console.log("Update response status:", res.status);
+      let responseBody = {} as { error?: string; message?: string };
+      try {
+        responseBody = await res.json(); // may hang if backend returns no body
+      } catch (e) {
+        console.warn("Failed to parse JSON from update response", e);
+      }
 
-      if (!res.ok) throw new Error(await res.text());
+      console.log("Update response status:", res.status, responseBody);
+
+      if (!res.ok) throw new Error(responseBody?.error || "Update failed");
 
       console.log("Fetching updated user data");
 
       const refreshed = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}`
       );
-
-      console.log("Refreshed user response status:", refreshed.status);
 
       const updatedUser = await refreshed.json();
 

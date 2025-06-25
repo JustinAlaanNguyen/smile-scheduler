@@ -40,10 +40,11 @@ exports.createUser = async (req, res) => {
 
 // Update account
 exports.updateUser = async (req, res) => {
-  console.log("➡️ Received update request for user:", req.params.id);
-  console.log("Request body:", req.body);
   const { username, email, password } = req.body;
   const id = req.params.id;
+
+  console.log("➡️ Received update request for user:", id);
+  console.log("Request body:", req.body);
 
   try {
     let sql, params;
@@ -57,22 +58,25 @@ exports.updateUser = async (req, res) => {
       params = [username, email, id];
     }
 
-    db.query(sql, params, (err, results) => {
-      if (err) {
-        console.error('❌ Update DB error:', err);
-        return res.status(500).json({ error: 'Database update failed.' });
-      }
-
-      console.log('✅ User updated in DB');
-      res.json({ message: 'User updated successfully' });
+    await new Promise((resolve, reject) => {
+      db.query(sql, params, (err) => {
+        if (err) {
+          console.error('Update DB error:', err);
+          return reject(err);
+        } else {
+          return resolve();
+        }
+      });
     });
+
+    console.log("✅ Update successful");
+    return res.status(200).json({ message: 'User updated successfully' });
+
   } catch (error) {
-    console.error('❌ Update error (outer catch):', error);
+    console.error('Update error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-
 
 
 // Delete account and all related appointments/clients// Delete account and related data
