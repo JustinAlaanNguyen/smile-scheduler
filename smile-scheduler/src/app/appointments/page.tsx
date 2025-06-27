@@ -32,6 +32,13 @@ const MyAppointments = () => {
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [calendarHeight, setCalendarHeight] = useState(600);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 640) {
+      setCalendarHeight(800);
+    }
+  }, []);
 
   const handleSelectSlot = (slotInfo: { start: Date }) => {
     const date = moment(slotInfo.start).format("YYYY-MM-DD");
@@ -73,7 +80,9 @@ const MyAppointments = () => {
         const endStr = moment(end).format("YYYY-MM-DD");
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/user/${encodeURIComponent(userId)}/range?start=${encodeURIComponent(startStr)}&end=${encodeURIComponent(endStr)}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/appointments/user/${encodeURIComponent(
+            userId
+          )}/range?start=${encodeURIComponent(startStr)}&end=${encodeURIComponent(endStr)}`
         );
         if (!res.ok) throw new Error("Failed to fetch appointments");
 
@@ -91,9 +100,9 @@ const MyAppointments = () => {
         );
 
         const events = Object.entries(counts).map(([date, count]) => {
-          const m = moment(date, "YYYY-MM-DD"); // interpret as local, not UTC
+          const m = moment(date, "YYYY-MM-DD");
           return {
-            title: `${count} appointment${count > 1 ? "s" : ""}`,
+            title: `${count} appt${count > 1 ? "s" : ""}`,
             start: m.startOf("day").toDate(),
             end: m.endOf("day").toDate(),
             allDay: true,
@@ -156,22 +165,24 @@ const MyAppointments = () => {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-6xl mx-auto bg-white shadow-lg rounded-xl p-6"
+        className="w-full px-2 sm:px-6"
       >
-        <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          views={["month"]}
-          defaultView="month"
-          date={currentDate}
-          onNavigate={handleNavigate}
-          style={{ height: 600 }}
-          className="rounded-lg"
-          selectable
-          onSelectSlot={handleSelectSlot}
-        />
+        <div className="bg-white shadow-lg rounded-xl p-2 sm:p-6">
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            views={["month"]}
+            defaultView="month"
+            date={currentDate}
+            onNavigate={handleNavigate}
+            style={{ height: calendarHeight }}
+            className="rounded-lg"
+            selectable
+            onSelectSlot={handleSelectSlot}
+          />
+        </div>
       </motion.div>
 
       <div className="text-center mt-10">

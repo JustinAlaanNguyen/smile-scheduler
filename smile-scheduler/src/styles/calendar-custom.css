@@ -57,3 +57,38 @@
   transition: background-color 0.2s ease-in-out;
   cursor: pointer;
 }
+
+@media (max-width: 640px) {
+  .rbc-day-bg {
+    min-height: 70px;
+  }
+
+  .rbc-event {
+    font-size: 0.65rem !important;
+    padding: 1px 2px !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+
+  .rbc-date-cell {
+    font-size: 0.7rem;
+    padding: 0 2px;
+  }
+
+  .rbc-label {
+    font-size: 0.6rem;
+  }
+
+  .rbc-month-view {
+    font-size: 0.7rem;
+  }
+
+  .rbc-header {
+    font-size: 0.65rem;
+    padding: 4px 0;
+  }
+
+  .rbc-month-row {
+    min-height: 90px;
+  }
+}
