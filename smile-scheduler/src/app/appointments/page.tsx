@@ -111,11 +111,15 @@ const MyAppointments = () => {
 
         // Create calendar events with a count-based label for each day
         const events = Object.entries(counts).map(([date, count]) => {
-          const m = moment(date, "YYYY-MM-DD");
+          const [year, month, day] = date.split("-").map(Number);
+
+          // Temporarily shift forward 1 day to fix timezone issue
+          const shifted = moment({ year, month: month - 1, day }).add(1, "day");
+
           return {
             title: `${count} appt${count > 1 ? "s" : ""}`,
-            start: m.startOf("day").toDate(),
-            end: m.endOf("day").toDate(),
+            start: shifted.startOf("day").toDate(),
+            end: shifted.endOf("day").toDate(),
             allDay: true,
           };
         });
