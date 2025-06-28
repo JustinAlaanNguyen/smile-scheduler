@@ -6,6 +6,7 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
+  // Sends a reset request to the backend with the user's email
   const handleResetRequest = async () => {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/forgot-password`,
@@ -26,6 +27,8 @@ export default function ForgotPasswordPage() {
         <h2 className="text-xl text-black font-semibold mb-4">
           Reset Your Password
         </h2>
+
+        {/* Email Input Field */}
         <input
           type="email"
           placeholder="Enter your email"
@@ -33,12 +36,16 @@ export default function ForgotPasswordPage() {
           onChange={(e) => setEmail(e.target.value)}
           className="text-black border p-2 rounded w-full mb-4"
         />
+
+        {/* Submit Button */}
         <button
           onClick={handleResetRequest}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
         >
           Send Reset Link
         </button>
+
+        {/* Message Display */}
         {message && <p className="text-black mt-4 text-sm">{message}</p>}
       </div>
     </div>

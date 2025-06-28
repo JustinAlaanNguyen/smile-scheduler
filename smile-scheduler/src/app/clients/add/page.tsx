@@ -17,6 +17,7 @@ export default function AddClientPage() {
 
   const router = useRouter();
 
+  // Fetch logged-in user's ID from session
   useEffect(() => {
     const fetchUserId = async () => {
       const res = await fetch("/api/auth/session");
@@ -32,7 +33,7 @@ export default function AddClientPage() {
     fetchUserId();
   }, []);
 
-  // Clear error after 5 seconds
+  // Clear any error messages after 5 seconds
   useEffect(() => {
     if (errorMessage) {
       const timer = setTimeout(() => setErrorMessage(""), 5000);
@@ -40,8 +41,10 @@ export default function AddClientPage() {
     }
   }, [errorMessage]);
 
+  // Check if all input fields are filled
   const allFieldsFilled = firstName && lastName && email && phone && notes;
 
+  // Handle form submission
   const submitClientToDatabase = async () => {
     if (!userId) {
       setErrorMessage("User ID not loaded.");
@@ -53,9 +56,7 @@ export default function AddClientPage() {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/add`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             first_name: firstName,
             last_name: lastName,
@@ -73,15 +74,15 @@ export default function AddClientPage() {
       } else {
         const errorData = await res.json();
         setErrorMessage(errorData.error || "Failed to add client.");
-        setShowModal(false); // Close modal on error
+        setShowModal(false);
       }
-    } catch (err) {
-      console.error("Client creation error:", err);
+    } catch {
       setErrorMessage("An unexpected error occurred.");
       setShowModal(false);
     }
   };
 
+  // Cancel and navigate back to client list
   const handleCancel = () => {
     if (confirm("Cancel adding this client?")) {
       router.push("/clients");
@@ -102,6 +103,7 @@ export default function AddClientPage() {
           Add New Client
         </h1>
 
+        {/* Form inputs */}
         <div className="space-y-4">
           <input
             className="w-full p-3 border rounded-md text-gray-800 focus:ring-2 focus:ring-[#327b8c]"
@@ -147,6 +149,7 @@ export default function AddClientPage() {
           />
         </div>
 
+        {/* Display error message */}
         {errorMessage && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -157,6 +160,7 @@ export default function AddClientPage() {
           </motion.div>
         )}
 
+        {/* Action buttons */}
         <div className="flex justify-between pt-4">
           <button
             onClick={() => setShowModal(true)}
@@ -178,7 +182,7 @@ export default function AddClientPage() {
         </div>
       </motion.div>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation modal before final submission */}
       <AnimatePresence>
         {showModal && (
           <motion.div

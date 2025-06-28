@@ -18,6 +18,7 @@ interface Client {
 
 export default function ClientsPage() {
   const { data: session, status } = useSession();
+
   const [clients, setClients] = useState<Client[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +26,7 @@ export default function ClientsPage() {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [userId, setUserId] = useState<number | null>(null);
 
+  // Debounce the search query to reduce API calls
   useEffect(() => {
     const delay = setTimeout(() => {
       setDebouncedQuery(searchQuery);
@@ -32,6 +34,7 @@ export default function ClientsPage() {
     return () => clearTimeout(delay);
   }, [searchQuery]);
 
+  // Fetch the current user's ID based on their session email
   useEffect(() => {
     const fetchUserId = async () => {
       if (!session?.user?.email) return;
@@ -55,6 +58,7 @@ export default function ClientsPage() {
     fetchUserId();
   }, [session]);
 
+  // Fetch client list (optionally filtered by search query)
   useEffect(() => {
     const fetchClients = async () => {
       if (!userId) return;
@@ -62,10 +66,12 @@ export default function ClientsPage() {
 
       try {
         const url = debouncedQuery
-          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/user/${encodeURIComponent(userId)}/search?query=${encodeURIComponent(
-              debouncedQuery
-            )}`
-          : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/user/${encodeURIComponent(userId)}`;
+          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/user/${encodeURIComponent(
+              userId
+            )}/search?query=${encodeURIComponent(debouncedQuery)}`
+          : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/clients/user/${encodeURIComponent(
+              userId
+            )}`;
 
         const res = await fetch(url);
         if (!res.ok) throw new Error("Failed to fetch clients");
@@ -83,12 +89,14 @@ export default function ClientsPage() {
     fetchClients();
   }, [userId, debouncedQuery]);
 
+  // Loading state
   if (status === "loading" || loading) {
     return (
       <div className="text-center mt-20 text-lg text-[#4e6472]">Loading...</div>
     );
   }
 
+  // If user is not authenticated
   if (status === "unauthenticated") {
     return (
       <div className="text-center mt-20 text-red-500 text-xl">
@@ -97,6 +105,7 @@ export default function ClientsPage() {
     );
   }
 
+  // Display error message if any
   if (error) {
     return (
       <div className="text-center mt-20 text-red-500 text-xl">{error}</div>
@@ -111,10 +120,13 @@ export default function ClientsPage() {
       transition={{ duration: 0.4 }}
     >
       <Navbar />
+
+      {/* Page title */}
       <h1 className="text-4xl font-bold text-center text-[#4e6472] mb-6 mt-4">
         🦷 My Clients
       </h1>
 
+      {/* Search bar and Add Client button */}
       <div className="max-w-3xl mx-auto mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4">
         <div className="relative flex-1">
           <input
@@ -136,6 +148,7 @@ export default function ClientsPage() {
         </Link>
       </div>
 
+      {/* Client list or no-client message */}
       {clients && clients.length === 0 ? (
         <p className="text-center text-xl text-[#4e6472]">No clients found.</p>
       ) : (
@@ -176,6 +189,7 @@ export default function ClientsPage() {
         </motion.div>
       )}
 
+      {/* Back to Dashboard link */}
       <div className="text-center mt-10">
         <Link href="/dashboard" className="text-[#327b8c] hover:underline">
           ← Back to Dashboard

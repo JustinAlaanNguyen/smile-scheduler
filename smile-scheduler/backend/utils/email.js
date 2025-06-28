@@ -1,6 +1,6 @@
 const { Resend } = require('resend');
 
-const resend = new Resend(process.env.RESEND_API_KEY); // We'll add this to your .env file next
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Generic function to send an email
 const sendEmail = async ({ to, subject, html }) => {
@@ -11,8 +11,6 @@ const sendEmail = async ({ to, subject, html }) => {
       subject,
       html,
     });
-
-    console.log("✅ Email sent:", response);
     return response;
   } catch (error) {
     console.error("❌ Email sending failed:", error);

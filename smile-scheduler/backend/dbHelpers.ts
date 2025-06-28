@@ -10,15 +10,12 @@ interface UserRow extends RowDataPacket {
   email_verified: boolean;
 }
 export async function getUserByEmail(email: string) {
-  console.log("🔍 [getUserByEmail] Looking up user with email:", email);
 
   try {
     const [rows] = await db.query<UserRow[]>(
       "SELECT * FROM smile_scheduler_db.users WHERE email = ?",
       [email]
     );
-
-    console.log("📄 [getUserByEmail] Query result:", rows);
 
     if (rows.length === 0) {
       console.warn("⚠️ [getUserByEmail] No user found with email:", email);

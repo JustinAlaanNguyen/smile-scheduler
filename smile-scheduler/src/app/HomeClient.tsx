@@ -66,7 +66,7 @@ export default function HomeClient() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#9dc7d4] via-white to-[#9dc7d4] text-gray-800 font-sans">
       {/* Header */}
-      <header className="flex justify-between items-center px-6 py-4 bg-[#9dc7d4] shadow-md">
+      <header className="flex flex-col sm:flex-row sm:justify-between items-center gap-4 px-4 sm:px-6 py-4 bg-[#9dc7d4] shadow-md">
         <Image
           src="/homePage.png"
           alt="Smile Scheduler Logo"
@@ -74,7 +74,7 @@ export default function HomeClient() {
           height={40}
           priority
         />
-        <div className="flex gap-4">
+        <div className="flex flex-wrap justify-center gap-3">
           <Link href="/login">
             <button className="px-5 py-2 rounded-lg bg-[#327b8c] text-white hover:bg-[#285d69] transition duration-200">
               Login

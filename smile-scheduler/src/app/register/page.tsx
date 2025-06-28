@@ -5,8 +5,10 @@ import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { Comfortaa } from "next/font/google";
 
+// Load Google font
 const comfortaa = Comfortaa({ subsets: ["latin"], weight: ["400", "700"] });
 
+// Type guard to check if error is an AxiosError with a typed error message
 function isAxiosErrorWithResponse(
   error: unknown
 ): error is AxiosError<{ error: string }> {
@@ -30,9 +32,11 @@ export default function CreateAccountPage() {
   const usernameRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
 
+  // Check if password and confirmation match
   const passwordsMatch =
     password !== "" && confirmPassword !== "" && password === confirmPassword;
 
+  // Determine if the form is valid before enabling submission
   const isFormValid =
     username.trim() !== "" &&
     email.trim() !== "" &&
@@ -40,6 +44,7 @@ export default function CreateAccountPage() {
     confirmPassword !== "" &&
     passwordsMatch;
 
+  // Attempt to create a new user account
   const createUser = async () => {
     if (!passwordsMatch) {
       setError("❌ Passwords do not match.");
@@ -59,6 +64,7 @@ export default function CreateAccountPage() {
         }
       );
 
+      // Redirect to login with a success query param
       router.push("/login?justRegistered=true");
     } catch (err: unknown) {
       let message = "Something went wrong. Please try again.";
@@ -66,6 +72,7 @@ export default function CreateAccountPage() {
       if (isAxiosErrorWithResponse(err)) {
         const backendMsg = err.response?.data.error ?? "";
 
+        // Display friendly error if email already exists
         if (err.response?.status === 500) {
           message = "This email is already in use. Please try another one.";
         } else {
@@ -89,6 +96,7 @@ export default function CreateAccountPage() {
         </h2>
 
         <div className="space-y-4">
+          {/* Username Field */}
           <input
             ref={usernameRef}
             className="text-black border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-[#5cb5c9]"
@@ -98,6 +106,7 @@ export default function CreateAccountPage() {
             onChange={(e) => setUsername(e.target.value)}
           />
 
+          {/* Email Field */}
           <input
             className="text-black border border-gray-300 p-3 rounded w-full focus:outline-none focus:ring-2 focus:ring-[#5cb5c9]"
             type="email"
@@ -106,6 +115,7 @@ export default function CreateAccountPage() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
+          {/* Password Field */}
           <input
             className={`border p-3 rounded w-full focus:outline-none focus:ring-2 transition-all duration-300 focus:ring-[#5cb5c9] text-black ${
               confirmPassword && !passwordsMatch
@@ -118,6 +128,7 @@ export default function CreateAccountPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
+          {/* Confirm Password Field */}
           <input
             className={`border p-3 rounded w-full focus:outline-none focus:ring-2 transition-all duration-300 focus:ring-[#5cb5c9] text-black ${
               confirmPassword && !passwordsMatch
@@ -130,6 +141,7 @@ export default function CreateAccountPage() {
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
 
+          {/* Password Match Indicator */}
           {confirmPassword !== "" && (
             <p
               className={`text-sm ${
@@ -142,12 +154,14 @@ export default function CreateAccountPage() {
             </p>
           )}
 
+          {/* Error Message */}
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">
               {error}
             </div>
           )}
 
+          {/* Submit Button */}
           <button
             className={`w-full py-3 rounded text-white font-semibold transition duration-200 ${
               isFormValid && !loading
@@ -160,6 +174,7 @@ export default function CreateAccountPage() {
             {loading ? "Creating..." : "Create Account"}
           </button>
 
+          {/* Login Redirect */}
           <p className="text-center text-sm mt-4 text-gray-600">
             Already have an account?{" "}
             <a href="/login" className="text-[#327b8c] hover:underline">

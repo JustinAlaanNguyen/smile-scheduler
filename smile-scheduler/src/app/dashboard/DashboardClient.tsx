@@ -10,12 +10,14 @@ export default function DashboardClient() {
   const { data: session, status } = useSession();
   const loading = status === "loading";
 
+  // Show loading indicator while session is being determined
   if (loading) {
     return (
       <div className="text-center mt-20 text-xl text-[#4e6472]">Loading...</div>
     );
   }
 
+  // Restrict access if user is not authenticated
   if (!session) {
     return (
       <div className="text-center mt-20 text-red-500 text-xl">
@@ -27,6 +29,8 @@ export default function DashboardClient() {
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
       <Navbar />
+
+      {/* Main dashboard container with entrance animation */}
       <AnimatePresence mode="wait">
         <motion.div
           key="dashboard"
@@ -36,14 +40,16 @@ export default function DashboardClient() {
           transition={{ duration: 0.5 }}
           className="px-4 sm:px-10 pt-10 pb-20"
         >
+          {/* Welcome Header */}
           <div className="text-center mb-8 text-[#4e6472]">
             <h1 className="text-5xl font-bold">
               Welcome, {session.user?.name}!
             </h1>
           </div>
 
+          {/* Dashboard cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-[#4e6472] text-lg">
-            {/* Left Section */}
+            {/* Introduction / Getting Started Card */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
@@ -69,13 +75,14 @@ export default function DashboardClient() {
               </ol>
             </motion.div>
 
-            {/* Right Section */}
+            {/* Quick Navigation Links */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
               className="bg-white p-8 rounded-2xl shadow-xl flex flex-col gap-8"
             >
+              {/* Clients link */}
               <div>
                 <Link
                   href="/clients"
@@ -87,6 +94,8 @@ export default function DashboardClient() {
                   🪥 Create, edit, or delete client profiles.
                 </p>
               </div>
+
+              {/* Appointments link */}
               <div>
                 <Link
                   href="/appointments"
@@ -99,6 +108,8 @@ export default function DashboardClient() {
                   📅 Manage your appointments.
                 </p>
               </div>
+
+              {/* Notifications link */}
               <div>
                 <Link
                   href="/profile"

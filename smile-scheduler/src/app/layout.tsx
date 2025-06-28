@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Smile Scheduler",
   description: "A powerful scheduling tool for dental clinics",
+  icons: {
+    icon: "/tooth.ico",
+  },
 };
 
 export default function RootLayout({

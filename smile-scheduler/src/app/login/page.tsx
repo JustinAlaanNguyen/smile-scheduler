@@ -8,10 +8,11 @@ function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showMessage, setShowMessage] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [error, setError] = useState("");
 
+  // Show success message if user just registered or verified their email
   useEffect(() => {
     const justRegistered = searchParams?.get("justRegistered") === "true";
     const verified = searchParams?.get("verified") === "true";
@@ -21,6 +22,7 @@ function LoginContent() {
     }
   }, [searchParams]);
 
+  // Handles login using NextAuth credentials provider
   const handleLogin = async () => {
     const res = await signIn("credentials", {
       email,
@@ -44,18 +46,21 @@ function LoginContent() {
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md flex flex-col items-center gap-4">
         <h1 className="text-2xl font-semibold text-blue-700">Login</h1>
 
+        {/* Display success message after registration or verification */}
         {showMessage && (
           <div className="w-full bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded text-sm">
             ✅ Account created successfully. Please log in.
           </div>
         )}
 
+        {/* Display error message on failed login */}
         {error && (
           <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">
             {error}
           </div>
         )}
 
+        {/* Email input */}
         <input
           type="email"
           placeholder="Email"
@@ -63,6 +68,8 @@ function LoginContent() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
+
+        {/* Password input */}
         <input
           type="password"
           placeholder="Password"
@@ -70,12 +77,16 @@ function LoginContent() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+
+        {/* Login button */}
         <button
           onClick={handleLogin}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full"
         >
           Login
         </button>
+
+        {/* Forgot password link */}
         <p
           onClick={() => router.push("/forgot-password")}
           className="text-sm text-blue-600 hover:underline cursor-pointer"
@@ -83,6 +94,7 @@ function LoginContent() {
           Forgot your password?
         </p>
 
+        {/* Back to home button */}
         <button
           onClick={() => (window.location.href = "/")}
           className="mt-2 text-sm text-gray-600 hover:underline"

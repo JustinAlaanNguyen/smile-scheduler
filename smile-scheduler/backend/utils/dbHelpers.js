@@ -8,7 +8,7 @@ const getUserEmailById = async (userId) => {
     [userId]
   );
   if (rows.length === 0) return null;
-  return rows[0]; // { email, email_notifications_enabled }
+  return rows[0]; 
 };
 
 module.exports = {

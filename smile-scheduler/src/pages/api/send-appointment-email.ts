@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { to, subject, body } = req.body;
 
     const data = await resend.emails.send({
-      from: 'noreply@smile-scheduler.com', // Your verified sender
+      from: 'noreply@smile-scheduler.com', 
       to,
       subject,
       text: body,

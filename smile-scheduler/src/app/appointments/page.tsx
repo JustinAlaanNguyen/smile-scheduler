@@ -9,14 +9,16 @@ import { motion } from "framer-motion";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "@/styles/calendar-custom.css";
 import Navbar from "@/components/Navbar";
+import CustomToolbar from "@/components/CustomToolbar";
 
+// Configure localizer for react-big-calendar using Moment.js
 const localizer: DateLocalizer = momentLocalizer(moment);
 
 type Appointment = {
   appointment_date: string;
 };
 
-type AppointmentEvent = {
+export type AppointmentEvent = {
   title: string;
   start: Date;
   end: Date;
@@ -34,28 +36,36 @@ const MyAppointments = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarHeight, setCalendarHeight] = useState(600);
 
+  // Adjust calendar height for smaller screens
   useEffect(() => {
     if (typeof window !== "undefined" && window.innerWidth < 640) {
       setCalendarHeight(800);
     }
   }, []);
 
+  // Redirect to specific date page when clicking an event
+  const handleSelectEvent = (event: AppointmentEvent) => {
+    const date = moment(event.start).format("YYYY-MM-DD");
+    router.push(`/appointments/${date}`);
+  };
+
+  // Redirect to new appointment view when clicking an empty slot
   const handleSelectSlot = (slotInfo: { start: Date }) => {
     const date = moment(slotInfo.start).format("YYYY-MM-DD");
     router.push(`/appointments/${date}`);
   };
 
+  // Fetch the authenticated user's ID using their email
   useEffect(() => {
     const fetchUserId = async () => {
       if (!session?.user?.email) return;
 
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/id/${encodeURIComponent(
-            session.user.email
-          )}`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/id/${encodeURIComponent(session.user.email)}`
         );
         if (!res.ok) throw new Error("Failed to fetch user ID");
+
         const { id } = await res.json();
         setUserId(id);
       } catch (err: unknown) {
@@ -70,6 +80,7 @@ const MyAppointments = () => {
     }
   }, [session, status]);
 
+  // Fetch all appointments for the given date range (typically one month)
   const fetchAppointmentsForRange = useCallback(
     async (start: Date, end: Date) => {
       if (!userId) return;
@@ -88,17 +99,17 @@ const MyAppointments = () => {
 
         const data: Appointment[] = await res.json();
 
+        // Group appointments by date and count how many occur per day
         const counts: Record<string, number> = data.reduce(
           (acc, curr) => {
-            const dateStr = moment(curr.appointment_date, "YYYY-MM-DD").format(
-              "YYYY-MM-DD"
-            );
+            const dateStr = moment(curr.appointment_date).format("YYYY-MM-DD");
             acc[dateStr] = (acc[dateStr] || 0) + 1;
             return acc;
           },
           {} as Record<string, number>
         );
 
+        // Create calendar events with a count-based label for each day
         const events = Object.entries(counts).map(([date, count]) => {
           const m = moment(date, "YYYY-MM-DD");
           return {
@@ -121,6 +132,7 @@ const MyAppointments = () => {
     [userId]
   );
 
+  // Fetch appointments when userId or month view changes
   useEffect(() => {
     if (!userId) return;
 
@@ -130,16 +142,19 @@ const MyAppointments = () => {
     fetchAppointmentsForRange(startOfMonth, endOfMonth);
   }, [userId, currentDate, fetchAppointmentsForRange]);
 
+  // Handle calendar navigation (e.g., when user changes month)
   const handleNavigate = (newDate: Date) => {
     setCurrentDate(newDate);
   };
 
+  // Loading UI
   if (status === "loading" || loading) {
     return (
       <div className="text-center mt-20 text-lg text-[#4e6472]">Loading...</div>
     );
   }
 
+  // Access control for unauthenticated users
   if (status === "unauthenticated") {
     return (
       <div className="text-center mt-20 text-red-500 text-xl">
@@ -148,12 +163,14 @@ const MyAppointments = () => {
     );
   }
 
+  // Error display
   if (error) {
     return (
       <div className="text-center mt-20 text-red-500 text-xl">{error}</div>
     );
   }
 
+  // Main UI
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
       <Navbar />
@@ -181,6 +198,10 @@ const MyAppointments = () => {
             className="rounded-lg"
             selectable
             onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+            components={{
+              toolbar: CustomToolbar,
+            }}
           />
         </div>
       </motion.div>

@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import Navbar from "@/components/Navbar";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Interface representing a user object
 interface User {
   id: number;
   username: string;
@@ -27,6 +28,7 @@ export default function MyProfilePage() {
   const [loading, setLoading] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
 
+  // Fetch current user data on mount
   useEffect(() => {
     if (!session?.user?.email) return;
 
@@ -44,6 +46,7 @@ export default function MyProfilePage() {
       });
   }, [session]);
 
+  // Toggle email notifications
   const handleToggleNotifications = async () => {
     if (!user) return;
 
@@ -58,11 +61,11 @@ export default function MyProfilePage() {
     }
   };
 
+  // Update profile information
   const handleUpdate = async () => {
     if (!user) return;
 
     setLoading(true);
-    console.log("Starting profile update");
 
     try {
       const res = await fetch(
@@ -76,16 +79,10 @@ export default function MyProfilePage() {
 
       let responseBody = {} as { error?: string; message?: string };
       try {
-        responseBody = await res.json(); // may hang if backend returns no body
-      } catch (e) {
-        console.warn("Failed to parse JSON from update response", e);
-      }
-
-      console.log("Update response status:", res.status, responseBody);
+        responseBody = await res.json();
+      } catch {}
 
       if (!res.ok) throw new Error(responseBody?.error || "Update failed");
-
-      console.log("Fetching updated user data");
 
       const refreshed = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}`
@@ -104,14 +101,13 @@ export default function MyProfilePage() {
 
       setTimeout(() => setConfirmationMessage(""), 3000);
     } catch (err) {
-      console.error("Update error caught in frontend:", err);
       alert("Failed to update profile: " + err);
     } finally {
       setLoading(false);
-      console.log("Update process ended");
     }
   };
 
+  // Delete account
   const handleDelete = async () => {
     if (!user) return;
     if (!window.confirm("Delete your account permanently?")) return;
@@ -129,6 +125,7 @@ export default function MyProfilePage() {
     }
   };
 
+  // Reset form to last saved user values
   const resetForm = () => {
     if (!user) return;
     setUsername(user.username);
@@ -193,6 +190,7 @@ export default function MyProfilePage() {
             Role: <strong>{user.role}</strong>
           </p>
 
+          {/* Notification toggle */}
           <div className="text-center">
             <p className="mb-2 text-black">
               Notifications:{" "}
@@ -208,6 +206,7 @@ export default function MyProfilePage() {
             </button>
           </div>
 
+          {/* Action buttons */}
           {!editMode ? (
             <button
               onClick={() => setEditMode(true)}
@@ -244,6 +243,7 @@ export default function MyProfilePage() {
           )}
         </div>
 
+        {/* Sign out button */}
         <div className="mt-10 text-center">
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
@@ -257,6 +257,7 @@ export default function MyProfilePage() {
   );
 }
 
+// Reusable input component with optional visibility toggle
 function InputField({
   label,
   value,

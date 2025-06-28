@@ -35,5 +35,5 @@ app.use('/api/clients', clientRoutes);
 app.use("/api/appointments", appointmentRoutes);
 
 app.listen(port, () => {
-  console.log(`✅ Server is running on http://localhost:${port}`);
+  //console.log(`✅ Server is running on http://localhost:${port}`);
 });

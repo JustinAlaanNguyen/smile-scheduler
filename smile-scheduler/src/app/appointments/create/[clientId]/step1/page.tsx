@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   format,
   startOfMonth,
@@ -14,27 +14,35 @@ import {
   isSameMonth,
 } from "date-fns";
 import Navbar from "@/components/Navbar";
-import { useParams } from "next/navigation";
 
 const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function AppointmentStep1() {
   const { clientId } = useParams() as { clientId: string };
   const router = useRouter();
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const today = new Date();
+
+  // Generate all days in the current month
   const start = startOfMonth(currentMonth);
   const end = endOfMonth(currentMonth);
   const daysInMonth = eachDayOfInterval({ start, end });
 
+  // Calculate offset for grid alignment (e.g., if month starts on a Thursday)
+  const startOffset = getDay(start);
+  const paddedDays = Array(startOffset).fill(null).concat(daysInMonth);
+
+  // Handle user selecting a date (future or today only)
   const handleDateClick = (date: Date) => {
     if (!isBefore(date, today)) {
       setSelectedDate(date);
     }
   };
 
+  // Move to Step 2 with selected date
   const handleSelect = () => {
     if (selectedDate) {
       router.push(
@@ -43,19 +51,17 @@ export default function AppointmentStep1() {
     }
   };
 
+  // Navigate to previous month (disabled if current is this month)
   const handlePrevMonth = () => {
     if (!isSameMonth(currentMonth, today)) {
       setCurrentMonth(subMonths(currentMonth, 1));
     }
   };
 
+  // Navigate to next month
   const handleNextMonth = () => {
     setCurrentMonth(addMonths(currentMonth, 1));
   };
-
-  const startOffset = getDay(start); // Sunday = 0
-
-  const paddedDays = Array(startOffset).fill(null).concat(daysInMonth);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#9dc7d4] via-white to-[#9dc7d4]">
@@ -65,7 +71,7 @@ export default function AppointmentStep1() {
           Select a Date
         </h1>
 
-        {/* Month + Navigation */}
+        {/* Month navigation */}
         <div className="flex items-center justify-center gap-6 mb-4">
           <button
             onClick={handlePrevMonth}
@@ -82,9 +88,9 @@ export default function AppointmentStep1() {
           </button>
         </div>
 
-        {/* Calendar */}
+        {/* Calendar grid */}
         <div className="bg-white p-4 rounded-xl shadow-md">
-          {/* Weekday labels */}
+          {/* Weekday headings */}
           <div className="grid grid-cols-7 gap-2 mb-2 text-sm font-semibold text-[#4e6472]">
             {weekDays.map((day) => (
               <div key={day} className="text-center">
@@ -96,9 +102,7 @@ export default function AppointmentStep1() {
           {/* Day buttons */}
           <div className="grid grid-cols-7 gap-2">
             {paddedDays.map((day, index) => {
-              if (!day) {
-                return <div key={index} />;
-              }
+              if (!day) return <div key={index} />;
 
               const isSelected =
                 selectedDate &&
@@ -118,8 +122,8 @@ export default function AppointmentStep1() {
                       isSelected
                         ? "bg-[#327b8c] text-white"
                         : isDisabled
-                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                        : "bg-[#f0f7fa] hover:bg-[#d3eaf1]"
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-[#f0f7fa] hover:bg-[#d3eaf1]"
                     }`}
                 >
                   {format(day, "d")}
@@ -129,7 +133,7 @@ export default function AppointmentStep1() {
           </div>
         </div>
 
-        {/* Footer Buttons */}
+        {/* Navigation buttons */}
         <div className="flex justify-between mt-10">
           <button
             onClick={() => router.push(`/clients/${clientId}`)}
@@ -137,7 +141,6 @@ export default function AppointmentStep1() {
           >
             Cancel
           </button>
-
           <button
             disabled={!selectedDate}
             onClick={handleSelect}

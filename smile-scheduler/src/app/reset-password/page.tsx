@@ -13,7 +13,7 @@ function ResetPasswordInner() {
   const [message, setMessage] = useState("");
   const router = useRouter();
 
-  const searchParams = useSearchParams(); // ✅ allowed inside Suspense
+  const searchParams = useSearchParams();
   const token = searchParams?.get("token");
 
   // (optional) show a spinner while we send the request
